@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <title>Steamline: 서울 지하철 스팀펑크 릴레이</title>
+  <title>Steamline: 서울 지하철역 릴레이</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <!-- 웹폰트 (선택) -->
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
@@ -1020,6 +1020,197 @@
       }
     }
 
+    /* 난이도 진행 모달 */
+    .level-up-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(10px);
+      z-index: 10001;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      animation: modalFadeIn 0.3s ease;
+    }
+
+    .level-up-modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: radial-gradient(circle at top, rgba(198,156,109,0.3), rgba(7,7,11,0.98));
+      border: 3px solid var(--accent-brass);
+      border-radius: 24px;
+      padding: 30px;
+      max-width: 500px;
+      text-align: center;
+      box-shadow: 0 0 50px rgba(198,156,109,0.6);
+      animation: modalSlideIn 0.4s ease;
+    }
+
+    .modal-title {
+      font-size: 36px;
+      font-weight: 700;
+      color: var(--accent-safe);
+      text-shadow: 0 0 20px rgba(102,255,204,0.8);
+      margin-bottom: 15px;
+    }
+
+    .modal-message {
+      font-size: 18px;
+      color: var(--text-main);
+      margin-bottom: 25px;
+      line-height: 1.6;
+    }
+
+    .modal-buttons {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+    }
+
+    @keyframes modalFadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+
+    @keyframes modalSlideIn {
+      from {
+        transform: translateY(-50px) scale(0.9);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+      }
+    }
+
+    /* 마스터 클리어 축하 */
+    .master-celebration {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle, rgba(255,215,0,0.3), rgba(198,156,109,0.2));
+      z-index: 10002;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(10px);
+      animation: celebrationFadeIn 0.5s ease;
+    }
+
+    .master-celebration.active {
+      display: flex;
+    }
+
+    .celebration-content {
+      text-align: center;
+      color: var(--text-main);
+      animation: celebrationPulse 2s ease infinite;
+    }
+
+    .celebration-title {
+      font-size: 64px;
+      font-weight: 700;
+      color: #ffd700;
+      text-shadow: 
+        0 0 30px rgba(255,215,0,1),
+        0 0 60px rgba(255,215,0,0.8),
+        0 0 90px rgba(255,215,0,0.6);
+      margin-bottom: 20px;
+      animation: celebrationShake 0.5s ease infinite;
+    }
+
+    .celebration-subtitle {
+      font-size: 32px;
+      color: var(--accent-safe);
+      text-shadow: 0 0 20px rgba(102,255,204,0.8);
+      margin-bottom: 15px;
+    }
+
+    .celebration-text {
+      font-size: 24px;
+      color: var(--accent-brass);
+      text-shadow: 0 0 15px rgba(198,156,109,0.8);
+    }
+
+    .celebration-fireworks {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .firework {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      animation: fireworkExplode 1s ease-out forwards;
+    }
+
+    @keyframes celebrationFadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+
+    @keyframes celebrationPulse {
+      0%, 100% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.05);
+      }
+    }
+
+    @keyframes celebrationShake {
+      0%, 100% {
+        transform: translateX(0);
+      }
+      25% {
+        transform: translateX(-5px) rotate(-2deg);
+      }
+      75% {
+        transform: translateX(5px) rotate(2deg);
+      }
+    }
+
+    @keyframes fireworkExplode {
+      0% {
+        opacity: 1;
+        transform: translate(0, 0) scale(1);
+      }
+      50% {
+        opacity: 1;
+        transform: translate(var(--move-x, 0), var(--move-y, 0)) scale(1.2);
+      }
+      100% {
+        opacity: 0;
+        transform: translate(var(--move-x, 0), var(--move-y, 0)) scale(0.3);
+      }
+    }
+
+    .firework {
+      --move-x: 0px;
+      --move-y: 0px;
+    }
+
     @media (max-width: 840px) {
       .main-layout {
         grid-template-columns: 1fr;
@@ -1222,6 +1413,28 @@
   </div>
 </div>
 
+<!-- 난이도 진행 다이얼로그 -->
+<div class="level-up-modal" id="levelUpModal">
+  <div class="modal-content">
+    <div class="modal-title" id="levelUpTitle">🎉 난이도 클리어! 🎉</div>
+    <div class="modal-message" id="levelUpMessage">다음 난이도로 도전하시겠습니까?</div>
+    <div class="modal-buttons">
+      <button class="btn btn-success" id="levelUpYes">✅ 다음 난이도로!</button>
+      <button class="btn btn-ghost" id="levelUpNo">취소</button>
+    </div>
+  </div>
+</div>
+
+<!-- 마스터 클리어 축하 오버레이 -->
+<div class="master-celebration" id="masterCelebration">
+  <div class="celebration-content">
+    <div class="celebration-title">🎊🎊🎊 완벽한 승리! 🎊🎊🎊</div>
+    <div class="celebration-subtitle">마스터 난이도를 클리어하셨습니다!</div>
+    <div class="celebration-text">당신은 진정한 지하철 마스터입니다! 🏆</div>
+    <div class="celebration-fireworks" id="celebrationFireworks"></div>
+  </div>
+</div>
+
 <script>
   /********************************************************************
    * 서울 지하철 역 데이터 (요약 버전)
@@ -1324,38 +1537,42 @@
   const DIFFICULTIES = {
     easy: {
       label: "초급",
+      nextLevel: "normal",
       timeLimit: 20,
       lives: 5,
       enableHints: true,
       comboTransfers: false,
-      aiAccuracy: 0.20,
+      aiAccuracy: 0.50, // 쥐 50%
       allowMistakes: true // 실수 허용 (목숨 감소 없음)
     },
     normal: {
       label: "중급",
+      nextLevel: "hard",
       timeLimit: 15,
       lives: 4,
       enableHints: true,
       comboTransfers: false,
-      aiAccuracy: 0.75,
+      aiAccuracy: 0.65, // 고양이 65%
       allowMistakes: false
     },
     hard: {
       label: "고급",
+      nextLevel: "master",
       timeLimit: 12,
       lives: 3,
       enableHints: true,
       comboTransfers: true,
-      aiAccuracy: 0.85,
+      aiAccuracy: 0.80, // 곰 80%
       allowMistakes: false
     },
     master: {
       label: "마스터",
+      nextLevel: null, // 마지막 난이도
       timeLimit: 10,
       lives: 2,
       enableHints: false,
       comboTransfers: true,
-      aiAccuracy: 0.90,
+      aiAccuracy: 0.93, // 뱀 93%
       allowMistakes: false
     }
   };
@@ -2124,7 +2341,25 @@
       log("sys", `🎉🎉🎉 승리! 🎉🎉🎉`);
       log("sys", `⚡ 최종 점수: 플레이어 ${state.playerScore} vs AI ${state.aiScore}`);
       log("sys", `🔥 최대 콤보: ${state.combo}콤보!`);
-      log("sys", `💡 리붓 버튼을 눌러 다시 시작할 수 있습니다!`);
+      log("sys", `🔥 최대 스트릭: ${state.streak}스트릭!`);
+      
+      const cfg = DIFFICULTIES[state.difficulty];
+      
+      // 마스터 클리어 시 특별 축하
+      if (state.difficulty === "master") {
+        showMasterCelebration();
+        log("sys", `🏆 마스터 난이도를 클리어하셨습니다! 완벽한 승리입니다! 🏆`);
+        el.statusLabel.textContent = "🏆 마스터 클리어! 당신은 진정한 지하철 마스터입니다! 🏆";
+      } else if (cfg.nextLevel) {
+        // 다음 난이도로 진행할지 물어보기
+        setTimeout(() => {
+          showLevelUpModal(cfg.nextLevel);
+        }, 1500);
+        log("sys", `💡 다음 난이도(${DIFFICULTIES[cfg.nextLevel].label})로 도전하시겠습니까?`);
+      } else {
+        log("sys", `💡 리붓 버튼을 눌러 다시 시작할 수 있습니다!`);
+      }
+      
       el.statusLabel.textContent = "🎉 승리했습니다! 스팀펑크 AI를 물리쳤습니다!";
       el.statusLabel.style.color = "var(--accent-safe)";
       el.statusLabel.style.textShadow = "0 0 15px rgba(102,255,204,0.8)";
@@ -2142,6 +2377,135 @@
     if (el.stationInput) {
       el.stationInput.disabled = true;
       el.stationInput.placeholder = "게임 종료! 리붓 버튼을 눌러 다시 시작하세요.";
+    }
+  }
+
+  /********************************************************************
+   * 난이도 진행 모달
+   ********************************************************************/
+  let pendingNextLevel = null; // 다음 난이도 임시 저장
+
+  function showLevelUpModal(nextLevel) {
+    if (!el.levelUpModal || !el.levelUpTitle || !el.levelUpMessage) return;
+    
+    pendingNextLevel = nextLevel; // 다음 난이도 저장
+    const nextLevelName = DIFFICULTIES[nextLevel].label;
+    el.levelUpTitle.textContent = `🎉 ${DIFFICULTIES[state.difficulty].label} 클리어! 🎉`;
+    el.levelUpMessage.textContent = `다음 난이도 "${nextLevelName}"로 도전하시겠습니까?`;
+    el.levelUpModal.classList.add("active");
+    
+    // 축하 파티클 효과
+    createParticlesAtElement(el.levelUpModal, "combo", 50);
+  }
+
+  function hideLevelUpModal() {
+    if (el.levelUpModal) {
+      el.levelUpModal.classList.remove("active");
+      pendingNextLevel = null;
+    }
+  }
+
+  function proceedToNextLevel(nextLevel) {
+    hideLevelUpModal();
+    state.difficulty = nextLevel;
+    const cfg = DIFFICULTIES[nextLevel];
+    
+    // 난이도 선택 박스 업데이트
+    if (el.difficultySelect) {
+      el.difficultySelect.value = nextLevel;
+    }
+    
+    // 상태 초기화 및 새 난이도 적용
+    state.lives = cfg.lives;
+    state.aiLives = cfg.lives;
+    state.timeLeft = cfg.timeLimit;
+    
+    // 적 캐릭터 및 UI 업데이트
+    pickEnemy();
+    updateDifficultyInfo();
+    updateStats();
+    
+    // 새 게임 시작
+    resetGame();
+    
+    log("sys", `🚀 ${cfg.label} 난이도로 시작합니다! 새로운 도전이 시작됩니다!`);
+    createParticlesAtElement(el.difficultySelect, "bonus", 30);
+  }
+
+  /********************************************************************
+   * 마스터 클리어 축하
+   ********************************************************************/
+  function showMasterCelebration() {
+    el.masterCelebration.classList.add("active");
+    createFireworks();
+    
+    // 축하 파티클 효과
+    setTimeout(() => {
+      createParticlesAtElement(el.masterCelebration, "bonus", 100);
+    }, 500);
+    
+    // 10초 후 자동으로 닫기
+    setTimeout(() => {
+      el.masterCelebration.classList.remove("active");
+    }, 10000);
+  }
+
+  function createFireworks() {
+    const container = el.celebrationFireworks;
+    if (!container) return;
+    
+    const colors = ["#ffd700", "#ff6b6b", "#66ffcc", "#ffd700", "#c69c6d", "#ff4d4d", "#4dff4d", "#4d4dff"];
+    
+    // 여러 번 폭죽 발사
+    for (let burst = 0; burst < 10; burst++) {
+      setTimeout(() => {
+        const centerX = 20 + Math.random() * 60;
+        const centerY = 20 + Math.random() * 60;
+        const particleCount = 20 + Math.floor(Math.random() * 15);
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        
+        for (let i = 0; i < particleCount; i++) {
+          const firework = document.createElement("div");
+          firework.className = "firework";
+          
+          const angle = (Math.PI * 2 * i) / particleCount;
+          const distance = 50 + Math.random() * 100;
+          const x = centerX + Math.cos(angle) * distance / 10;
+          const y = centerY + Math.sin(angle) * distance / 10;
+          const size = Math.random() * 8 + 4;
+          const duration = 0.8 + Math.random() * 0.4;
+          
+          firework.style.left = x + "%";
+          firework.style.top = y + "%";
+          firework.style.background = color;
+          firework.style.width = size + "px";
+          firework.style.height = size + "px";
+          firework.style.boxShadow = `0 0 ${size * 3}px ${color}, 0 0 ${size * 6}px ${color}`;
+          firework.style.animation = `fireworkExplode ${duration}s ease-out forwards`;
+          firework.style.setProperty("--move-x", Math.cos(angle) * distance + "px");
+          firework.style.setProperty("--move-y", Math.sin(angle) * distance + "px");
+          
+          container.appendChild(firework);
+          
+          setTimeout(() => {
+            if (firework.parentNode) {
+              firework.remove();
+            }
+          }, duration * 1000);
+        }
+      }, burst * 300);
+    }
+    
+    // 추가 파티클 효과
+    for (let i = 0; i < 100; i++) {
+      setTimeout(() => {
+        createParticles(
+          Math.random() * window.innerWidth,
+          Math.random() * window.innerHeight,
+          "bonus",
+          1
+        );
+      }, i * 50);
     }
   }
 
@@ -2247,6 +2611,13 @@
       particleContainer: document.getElementById("particleContainer"),
       bonusOverlay: document.getElementById("bonusOverlay"),
       bonusText: document.getElementById("bonusText"),
+      levelUpModal: document.getElementById("levelUpModal"),
+      levelUpTitle: document.getElementById("levelUpTitle"),
+      levelUpMessage: document.getElementById("levelUpMessage"),
+      levelUpYes: document.getElementById("levelUpYes"),
+      levelUpNo: document.getElementById("levelUpNo"),
+      masterCelebration: document.getElementById("masterCelebration"),
+      celebrationFireworks: document.getElementById("celebrationFireworks"),
       enemyAvatar: document.getElementById("enemyAvatar"),
       enemyName: document.getElementById("enemyName"),
       enemyRole: document.getElementById("enemyRole"),
@@ -2298,6 +2669,28 @@
 
     el.hintBtn.addEventListener("click", showHint);
     el.resetGameBtn.addEventListener("click", resetGame);
+
+    // 난이도 진행 모달 이벤트
+    if (el.levelUpYes && el.levelUpNo) {
+      el.levelUpYes.addEventListener("click", () => {
+        if (pendingNextLevel) {
+          proceedToNextLevel(pendingNextLevel);
+        }
+      });
+      
+      el.levelUpNo.addEventListener("click", () => {
+        hideLevelUpModal();
+      });
+      
+      // 모달 배경 클릭 시 닫기
+      if (el.levelUpModal) {
+        el.levelUpModal.addEventListener("click", (e) => {
+          if (e.target === el.levelUpModal) {
+            hideLevelUpModal();
+          }
+        });
+      }
+    }
   }
 
   /********************************************************************
