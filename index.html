@@ -907,12 +907,16 @@
             <span class="stat-value" id="lives">3</span>
           </div>
           <div class="stat-pill">
+            <span class="stat-label">AI 생명력</span>
+            <span class="stat-value" id="aiLives">3</span>
+          </div>
+          <div class="stat-pill">
             <span class="stat-label">사용한 역</span>
             <span class="stat-value" id="usedCount">0</span>
           </div>
         </div>
         <div class="hint-text" id="hintText">
-          모든 난이도에서 모든 역을 입력할 수 있습니다! 난이도는 시간 제한과 AI 정확도로만 조절됩니다.
+          모든 난이도에서 모든 역을 입력할 수 있습니다! 난이도는 시간 제한과 AI 정확도로 조절됩니다. AI도 실수할 수 있어요!
         </div>
       </div>
 
@@ -1160,6 +1164,7 @@
     aiScore: 0,
     combo: 0,
     lives: DIFFICULTIES["normal"].lives,
+    aiLives: DIFFICULTIES["normal"].lives, // AI 생명력 추가
     timeLeft: DIFFICULTIES["normal"].timeLimit,
     timerId: null,
     chainLineLock: null // 환승 콤보용
@@ -1274,6 +1279,7 @@
     }
     
     el.lives.textContent = state.lives;
+    el.aiLives.textContent = state.aiLives;
     el.usedCount.textContent = state.used.size;
   }
 
@@ -1312,22 +1318,26 @@
       html += "<li>💡 힌트 버튼으로 초성/후보 역 제공</li>";
       html += "<li>🤖 AI 정확도: " + (cfg.aiAccuracy * 100).toFixed(0) + "% (약함)</li>";
       html += "<li>✨ 실수 허용: 잘못 입력해도 목숨 감소 없음</li>";
+      html += "<li>💀 AI도 실수: AI가 잘못된 역을 입력하면 생명력 감소</li>";
     } else if (state.difficulty === "normal") {
       html += "<li>⚡ 모든 역 입력 가능</li>";
       html += "<li>⏱ 시간 제한: " + cfg.timeLimit + "초, 목숨 " + cfg.lives + "개</li>";
       html += "<li>🤖 AI 정확도: " + (cfg.aiAccuracy * 100).toFixed(0) + "%</li>";
+      html += "<li>💀 AI도 실수: AI가 잘못된 역을 입력하면 생명력 감소</li>";
       html += "<li>🔥 콤보 달성 시 시간 보너스</li>";
     } else if (state.difficulty === "hard") {
       html += "<li>🔥 모든 역 입력 가능</li>";
       html += "<li>⚡ 환승역 입력 시 보너스 점수</li>";
       html += "<li>⏱ 시간 제한: " + cfg.timeLimit + "초, 목숨 " + cfg.lives + "개</li>";
       html += "<li>🤖 AI 정확도: " + (cfg.aiAccuracy * 100).toFixed(0) + "%</li>";
+      html += "<li>💀 AI도 실수: AI가 잘못된 역을 입력하면 생명력 감소</li>";
       html += "<li>🔥 콤보 달성 시 시간 보너스</li>";
     } else {
       html += "<li>💀 모든 역 입력 가능</li>";
       html += "<li>⚡ 환승역 입력 시 보너스 점수</li>";
       html += "<li>⏱ 시간 제한: " + cfg.timeLimit + "초, 목숨 " + cfg.lives + "개</li>";
       html += "<li>🤖 AI 정확도: " + (cfg.aiAccuracy * 100).toFixed(0) + "%</li>";
+      html += "<li>💀 AI도 실수: AI가 잘못된 역을 입력하면 생명력 감소</li>";
       html += "<li>🔥 콤보 달성 시 시간 보너스</li>";
     }
     el.difficultyInfoList.innerHTML = html;
@@ -1510,7 +1520,11 @@
     }
     
     let chosen;
+    let isCorrectChoice = false;
+    
     if (Math.random() < cfg.aiAccuracy) {
+      // AI가 정확하게 선택
+      isCorrectChoice = true;
       if (cfg.comboTransfers) {
         const transfers = available.filter(s => {
           const norm = normalizeStation(s);
@@ -1525,10 +1539,66 @@
         chosen = available[Math.floor(Math.random() * available.length)];
       }
     } else {
-      const wrong = stationList.filter(s => !state.used.has(normalizeStation(s)));
-      chosen = wrong[Math.floor(Math.random() * wrong.length)] || available[0];
+      // AI가 실수로 잘못된 역 선택 (다른 호선의 역이나 존재하지 않는 역)
+      isCorrectChoice = false;
+      // 다른 호선의 역 중에서 랜덤 선택
+      const allOtherLines = Object.keys(SUBWAY_DATA).filter(key => key !== state.line);
+      const wrongStations = [];
+      allOtherLines.forEach(lineKey => {
+        const otherLineStations = SUBWAY_DATA[lineKey].all;
+        wrongStations.push(...otherLineStations);
+      });
+      
+      if (wrongStations.length > 0) {
+        chosen = wrongStations[Math.floor(Math.random() * wrongStations.length)];
+      } else {
+        // 만약 다른 호선이 없다면, 사용된 역 중에서 선택 (이미 사용한 역)
+        const usedStations = Array.from(state.used);
+        if (usedStations.length > 0) {
+          chosen = usedStations[Math.floor(Math.random() * usedStations.length)];
+        } else {
+          // 최후의 수단: 존재하지 않는 역 이름 생성
+          chosen = "존재하지않는역" + Math.floor(Math.random() * 1000);
+        }
+      }
     }
     
+    // AI의 선택을 검증
+    const validation = validateStation(chosen);
+    
+    // AI가 의도적으로 실수한 경우 (!isCorrectChoice) 또는 검증 실패한 경우
+    if (!isCorrectChoice || !validation.valid) {
+      // AI가 잘못된 역을 선택함
+      state.aiLives--;
+      const errorMessages = [
+        `❌ AI가 잘못된 역 "${chosen}"을 입력했습니다!`,
+        `💀 AI 실수! "${chosen}"은(는) ${info.name}에 없습니다!`,
+        `⚠️ AI가 "${chosen}"을(를) 잘못 입력했습니다!`
+      ];
+      log("ai", errorMessages[Math.floor(Math.random() * errorMessages.length)]);
+      log("sys", `🤖 AI 생명력: ${state.aiLives}개 남음`);
+      
+      updateStats();
+      
+      if (state.aiLives <= 0) {
+        log("sys", "🎉 AI가 모든 생명력을 잃었습니다! 플레이어 승리!");
+        endGame(true);
+        return;
+      }
+      
+      // AI가 실수했으므로 턴을 플레이어에게 넘김
+      resetTimer();
+      setTimeout(() => {
+        state.turn = "player";
+        el.statusLabel.textContent = "AI가 실수했습니다! 당신의 차례입니다!";
+        if (el.stationInput) {
+          el.stationInput.focus();
+        }
+      }, 1500);
+      return;
+    }
+    
+    // AI가 올바른 역을 선택함
     const norm = normalizeStation(chosen);
     state.used.add(norm);
     state.lastStation = chosen;
@@ -1627,6 +1697,7 @@
     state.combo = 0;
     const cfg = DIFFICULTIES[state.difficulty];
     state.lives = cfg.lives;
+    state.aiLives = cfg.lives; // AI 생명력 초기화
     state.timeLeft = cfg.timeLimit;
     state.chainLineLock = null;
     
@@ -1705,6 +1776,7 @@
       aiScore: document.getElementById("aiScore"),
       comboCount: document.getElementById("comboCount"),
       lives: document.getElementById("lives"),
+      aiLives: document.getElementById("aiLives"),
       usedCount: document.getElementById("usedCount"),
       hintText: document.getElementById("hintText"),
       resetGameBtn: document.getElementById("resetGameBtn"),
@@ -1735,6 +1807,7 @@
       state.difficulty = el.difficultySelect.value;
       const cfg = DIFFICULTIES[state.difficulty];
       state.lives = cfg.lives;
+      state.aiLives = cfg.lives; // AI 생명력도 업데이트
       pickEnemy();
       updateDifficultyInfo();
       updateStats();
