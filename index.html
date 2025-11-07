@@ -912,7 +912,7 @@
           </div>
         </div>
         <div class="hint-text" id="hintText">
-          난이도와 모드에 따라 허용되는 역 조건이 달라집니다. (초급: 대표역 위주, 마스터: 실제 인접역만 가능)
+          모든 난이도에서 모든 역을 입력할 수 있습니다! 난이도는 시간 제한과 AI 정확도로만 조절됩니다.
         </div>
       </div>
 
@@ -1058,35 +1058,39 @@
   const DIFFICULTIES = {
     easy: {
       label: "초급",
-      timeLimit: 14,
-      lives: 4,
+      timeLimit: 20,
+      lives: 5,
       enableHints: true,
       comboTransfers: false,
-      aiAccuracy: 0.25
+      aiAccuracy: 0.20,
+      allowMistakes: true // 실수 허용 (목숨 감소 없음)
     },
     normal: {
       label: "중급",
-      timeLimit: 10,
-      lives: 3,
+      timeLimit: 15,
+      lives: 4,
       enableHints: true,
       comboTransfers: false,
-      aiAccuracy: 0.92
+      aiAccuracy: 0.75,
+      allowMistakes: false
     },
     hard: {
       label: "고급",
-      timeLimit: 8,
+      timeLimit: 12,
       lives: 3,
       enableHints: true,
       comboTransfers: true,
-      aiAccuracy: 0.97
+      aiAccuracy: 0.85,
+      allowMistakes: false
     },
     master: {
       label: "마스터",
-      timeLimit: 6,
-      lives: 1,
+      timeLimit: 10,
+      lives: 2,
       enableHints: false,
       comboTransfers: true,
-      aiAccuracy: 0.995
+      aiAccuracy: 0.90,
+      allowMistakes: false
     }
   };
 
@@ -1304,23 +1308,27 @@
     let html = "";
     if (state.difficulty === "easy") {
       html += "<li>⚙ 모든 역 입력 가능</li>";
-      html += "<li>⏱ 시간 여유: " + cfg.timeLimit + "초, 넉넉한 목숨</li>";
+      html += "<li>⏱ 시간 여유: " + cfg.timeLimit + "초, 넉넉한 목숨 " + cfg.lives + "개</li>";
       html += "<li>💡 힌트 버튼으로 초성/후보 역 제공</li>";
-      html += "<li>🤖 AI 정확도: " + (cfg.aiAccuracy * 100).toFixed(0) + "%</li>";
+      html += "<li>🤖 AI 정확도: " + (cfg.aiAccuracy * 100).toFixed(0) + "% (약함)</li>";
+      html += "<li>✨ 실수 허용: 잘못 입력해도 목숨 감소 없음</li>";
     } else if (state.difficulty === "normal") {
       html += "<li>⚡ 모든 역 입력 가능</li>";
-      html += "<li>⏱ 시간 제한: " + cfg.timeLimit + "초</li>";
+      html += "<li>⏱ 시간 제한: " + cfg.timeLimit + "초, 목숨 " + cfg.lives + "개</li>";
       html += "<li>🤖 AI 정확도: " + (cfg.aiAccuracy * 100).toFixed(0) + "%</li>";
+      html += "<li>🔥 콤보 달성 시 시간 보너스</li>";
     } else if (state.difficulty === "hard") {
       html += "<li>🔥 모든 역 입력 가능</li>";
       html += "<li>⚡ 환승역 입력 시 보너스 점수</li>";
-      html += "<li>⏱ 시간 제한: " + cfg.timeLimit + "초</li>";
+      html += "<li>⏱ 시간 제한: " + cfg.timeLimit + "초, 목숨 " + cfg.lives + "개</li>";
       html += "<li>🤖 AI 정확도: " + (cfg.aiAccuracy * 100).toFixed(0) + "%</li>";
+      html += "<li>🔥 콤보 달성 시 시간 보너스</li>";
     } else {
       html += "<li>💀 모든 역 입력 가능</li>";
       html += "<li>⚡ 환승역 입력 시 보너스 점수</li>";
-      html += "<li>⏱ 시간 제한: " + cfg.timeLimit + "초</li>";
+      html += "<li>⏱ 시간 제한: " + cfg.timeLimit + "초, 목숨 " + cfg.lives + "개</li>";
       html += "<li>🤖 AI 정확도: " + (cfg.aiAccuracy * 100).toFixed(0) + "%</li>";
+      html += "<li>🔥 콤보 달성 시 시간 보너스</li>";
     }
     el.difficultyInfoList.innerHTML = html;
   }
@@ -1378,6 +1386,11 @@
   }
 
   function handleSubmit() {
+    if (state.turn === "ended") {
+      log("sys", "⚠️ 게임이 종료되었습니다. 리붓 버튼을 눌러 다시 시작하세요!");
+      return;
+    }
+    
     if (state.turn !== "player") {
       log("sys", "⚠️ 아직 당신의 턴이 아닙니다!");
       return;
@@ -1394,6 +1407,15 @@
     if (!result.valid) {
       el.submitBtn.classList.add("btn-error");
       setTimeout(() => el.submitBtn.classList.remove("btn-error"), 500);
+      const cfg = DIFFICULTIES[state.difficulty];
+      
+      // 초급 난이도에서는 실수 허용 (목숨 감소 없음)
+      if (cfg.allowMistakes) {
+        log("sys", `⚠️ ${result.reason} 다시 시도해보세요!`);
+        el.statusLabel.textContent = "⚠️ 잘못된 입력입니다. 다시 시도해보세요!";
+        return;
+      }
+      
       const errorMessages = [
         `❌ ${result.reason}`,
         `💀 ${result.reason} 목숨이 감소합니다!`,
@@ -1417,14 +1439,20 @@
     state.combo++;
     
     if (state.combo === 3) {
-      log("sys", "🔥 3콤보 달성! 보너스 점수 +1!");
+      log("sys", "🔥 3콤보 달성! 보너스 점수 +1! 시간 +2초!");
       state.playerScore++;
+      state.timeLeft = Math.min(state.timeLeft + 2, DIFFICULTIES[state.difficulty].timeLimit);
+      updateTimerUI();
     } else if (state.combo === 5) {
-      log("sys", "⚡ 5콤보 달성! 대단합니다! 보너스 점수 +2!");
+      log("sys", "⚡ 5콤보 달성! 대단합니다! 보너스 점수 +2! 시간 +3초!");
       state.playerScore += 2;
+      state.timeLeft = Math.min(state.timeLeft + 3, DIFFICULTIES[state.difficulty].timeLimit);
+      updateTimerUI();
     } else if (state.combo === 10) {
-      log("sys", "🎉 10콤보 달성! 전설적인 플레이! 보너스 점수 +5!");
+      log("sys", "🎉 10콤보 달성! 전설적인 플레이! 보너스 점수 +5! 시간 +5초!");
       state.playerScore += 5;
+      state.timeLeft = Math.min(state.timeLeft + 5, DIFFICULTIES[state.difficulty].timeLimit);
+      updateTimerUI();
     }
     
     const isTransfer = STATION_LINES[result.normalized] && STATION_LINES[result.normalized].size > 1;
@@ -1448,6 +1476,13 @@
     
     updateStats();
     resetTimer();
+    
+    // 입력 필드에 자동 포커스 (다음 입력 준비)
+    setTimeout(() => {
+      if (el.stationInput) {
+        el.stationInput.focus();
+      }
+    }, 100);
     
     setTimeout(() => {
       state.turn = "ai";
@@ -1520,11 +1555,28 @@
     setTimeout(() => {
       state.turn = "player";
       el.statusLabel.textContent = "당신의 차례입니다!";
+      // 입력 필드에 자동 포커스
+      if (el.stationInput) {
+        el.stationInput.focus();
+      }
     }, 1500);
   }
 
   function handleTimeout() {
     if (state.turn === "player") {
+      const cfg = DIFFICULTIES[state.difficulty];
+      
+      // 초급 난이도에서는 시간 초과 시 경고만
+      if (cfg.allowMistakes) {
+        log("sys", "⏰ 시간 초과! ⚠️ 다시 시도해보세요!");
+        el.statusLabel.textContent = "⏰ 시간 초과! 다시 입력해보세요!";
+        resetTimer();
+        if (el.stationInput) {
+          el.stationInput.focus();
+        }
+        return;
+      }
+      
       log("sys", "⏰ 시간 초과! 💀 목숨이 1개 감소했습니다...");
       state.lives--;
       updateStats();
@@ -1544,6 +1596,7 @@
       log("sys", `🎉🎉🎉 승리! 🎉🎉🎉`);
       log("sys", `⚡ 최종 점수: 플레이어 ${state.playerScore} vs AI ${state.aiScore}`);
       log("sys", `🔥 최대 콤보: ${state.combo}콤보!`);
+      log("sys", `💡 리붓 버튼을 눌러 다시 시작할 수 있습니다!`);
       el.statusLabel.textContent = "🎉 승리했습니다! 스팀펑크 AI를 물리쳤습니다!";
       el.statusLabel.style.color = "var(--accent-safe)";
       el.statusLabel.style.textShadow = "0 0 15px rgba(102,255,204,0.8)";
@@ -1551,11 +1604,17 @@
       log("sys", `💀 패배... 기계에게 당했습니다...`);
       log("sys", `⚡ 최종 점수: 플레이어 ${state.playerScore} vs AI ${state.aiScore}`);
       log("sys", `💪 다시 도전해보세요!`);
+      log("sys", `💡 리붓 버튼을 눌러 다시 시작할 수 있습니다!`);
       el.statusLabel.textContent = "💀 패배했습니다... 다시 도전하세요!";
       el.statusLabel.style.color = "var(--accent-danger)";
       el.statusLabel.style.textShadow = "0 0 15px rgba(255,77,77,0.8)";
     }
     state.turn = "ended";
+    // 게임 종료 후 입력 필드 비활성화
+    if (el.stationInput) {
+      el.stationInput.disabled = true;
+      el.stationInput.placeholder = "게임 종료! 리붓 버튼을 눌러 다시 시작하세요.";
+    }
   }
 
   function resetGame() {
@@ -1581,6 +1640,15 @@
     log("sys", "🎮 " + SUBWAY_DATA[state.line].name + " 타임어택 게임 시작!");
     log("sys", "⚡ " + ENEMIES[state.difficulty].name + "와의 대결입니다!");
     log("sys", "💡 힌트 버튼을 눌러 도움을 받을 수 있습니다.");
+    
+    // 입력 필드 활성화 및 자동 포커스
+    if (el.stationInput) {
+      el.stationInput.disabled = false;
+      el.stationInput.placeholder = "당신의 역 이름을 입력하세요. 예) 홍대입구";
+      setTimeout(() => {
+        el.stationInput.focus();
+      }, 100);
+    }
   }
 
   function showHint() {
@@ -1600,12 +1668,18 @@
       return;
     }
     
+    if (state.turn === "ended") {
+      log("sys", "⚠️ 게임이 종료되었습니다. 리붓 버튼을 눌러 다시 시작하세요!");
+      return;
+    }
+    
     const hint = available[Math.floor(Math.random() * available.length)];
     const firstChar = hint.charAt(0);
     const hints = [
       `💡 힌트: "${firstChar}"로 시작하는 역이 있습니다!`,
       `🔍 "${firstChar}"로 시작하는 역을 찾아보세요!`,
-      `⚙️ 기계가 알려드립니다: "${firstChar}"로 시작하는 역이 남아있습니다!`
+      `⚙️ 기계가 알려드립니다: "${firstChar}"로 시작하는 역이 남아있습니다!`,
+      `💡 사용 가능한 역: ${available.length}개 남았습니다!`
     ];
     log("sys", hints[Math.floor(Math.random() * hints.length)]);
   }
