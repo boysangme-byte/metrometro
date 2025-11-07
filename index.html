@@ -1,0 +1,1714 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>Steamline: 서울 지하철 스팀펑크 릴레이</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- 웹폰트 (선택) -->
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #070b12;
+      --bg-panel: #15151c;
+      --accent-brass: #c69c6d;
+      --accent-brass-soft: #b28850;
+      --accent-danger: #ff4d4d;
+      --accent-safe: #66ffcc;
+      --text-main: #f5f5f5;
+      --text-sub: #a9a9b8;
+      --border-brass: rgba(198,156,109,0.9);
+      --shadow-soft: 0 0 24px rgba(0,0,0,0.65);
+      --radius-xl: 22px;
+      --transition-fast: 0.18s ease-out;
+      --transition-med: 0.28s ease-out;
+      --font-ui: 'Noto Sans KR', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: var(--font-ui);
+      background:
+        radial-gradient(circle at top left, rgba(198,156,109,0.12), transparent),
+        radial-gradient(circle at bottom right, rgba(102,255,204,0.06), transparent),
+        #02040a;
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: stretch;
+      padding: 18px;
+    }
+
+    .game-shell {
+      width: 100%;
+      max-width: 1280px;
+      margin: auto;
+      background:
+        radial-gradient(circle at top, rgba(198,156,109,0.06), transparent),
+        rgba(4,6,12,0.98);
+      border-radius: var(--radius-xl);
+      border: 1px solid rgba(198,156,109,0.35);
+      box-shadow:
+        0 0 40px rgba(0,0,0,0.9),
+        inset 0 0 24px rgba(0,0,0,0.8);
+      padding: 18px 18px 16px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .game-shell::before,
+    .game-shell::after {
+      content: "⚙";
+      position: absolute;
+      font-size: 80px;
+      color: rgba(198,156,109,0.15);
+      top: -20px;
+      right: -10px;
+      pointer-events: none;
+      animation: gearRotateShell 12s linear infinite;
+    }
+    .game-shell::after {
+      font-size: 50px;
+      top: 30px;
+      right: 50px;
+      animation: gearRotateShell 8s linear infinite reverse;
+    }
+
+    @keyframes gearRotateShell {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    .title-block {
+      flex: 1;
+    }
+
+    .game-title {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      color: var(--accent-brass);
+      text-shadow: 
+        0 0 15px rgba(198,156,109,0.6),
+        0 0 30px rgba(198,156,109,0.3);
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      position: relative;
+      animation: titleGlow 3s ease-in-out infinite;
+    }
+
+    @keyframes titleGlow {
+      0%, 100% { text-shadow: 0 0 15px rgba(198,156,109,0.6), 0 0 30px rgba(198,156,109,0.3); }
+      50% { text-shadow: 0 0 25px rgba(198,156,109,0.9), 0 0 50px rgba(198,156,109,0.5); }
+    }
+
+    .game-subtitle {
+      font-size: 12px;
+      color: var(--text-sub);
+      margin-top: 3px;
+    }
+
+    .mode-controls {
+      display: flex;
+      gap: 8px;
+      align-items: stretch;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 10px;
+      color: var(--accent-brass-soft);
+    }
+
+    .select-steam {
+      background: radial-gradient(circle at top, #27211c, #0b0b10);
+      border-radius: 999px;
+      border: 1px solid var(--border-brass);
+      padding: 5px 10px;
+      color: var(--text-main);
+      font-size: 11px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .select-steam select {
+      background: transparent;
+      border: none;
+      color: var(--accent-brass);
+      font-size: 12px;
+      outline: none;
+      padding-right: 4px;
+      appearance: none;
+      cursor: pointer;
+    }
+
+    .select-steam span.label {
+      color: var(--text-sub);
+      font-size: 10px;
+      opacity: 0.85;
+    }
+
+    .mode-tabs {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+
+    .mode-tab {
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(198,156,109,0.45);
+      font-size: 9px;
+      color: var(--accent-brass-soft);
+      cursor: pointer;
+      opacity: 0.6;
+      transition: all var(--transition-fast);
+      backdrop-filter: blur(2px);
+    }
+
+    .mode-tab.active {
+      background: linear-gradient(to right, rgba(198,156,109,0.35), rgba(4,6,12,0.9));
+      color: var(--text-main);
+      opacity: 1;
+      box-shadow: 0 0 10px rgba(198,156,109,0.35);
+    }
+
+    .mode-tab:hover {
+      opacity: 0.95;
+    }
+
+    .main-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 2.2fr) minmax(220px, 1.35fr);
+      gap: 12px;
+      margin-top: 4px;
+      align-items: stretch;
+    }
+
+    .panel {
+      background: 
+        radial-gradient(circle at top left, rgba(198,156,109,0.08), transparent),
+        radial-gradient(circle at bottom right, rgba(102,255,204,0.04), transparent),
+        rgba(7,7,11,0.98);
+      border-radius: 18px;
+      padding: 12px;
+      border: 2px solid rgba(198,156,109,0.4);
+      box-shadow: 
+        0 0 30px rgba(198,156,109,0.2),
+        inset 0 0 20px rgba(0,0,0,0.5);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .panel::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, 
+        transparent, 
+        rgba(198,156,109,0.6), 
+        transparent
+      );
+      animation: steamFlow 3s ease-in-out infinite;
+    }
+
+    @keyframes steamFlow {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 0.8; }
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      margin-bottom: 6px;
+    }
+
+    .panel-title {
+      font-size: 12px;
+      color: var(--accent-brass);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .panel-title span.icon {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      border: 1px solid rgba(198,156,109,0.55);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 8px;
+      color: var(--accent-brass);
+    }
+
+    .status-label {
+      font-size: 9px;
+      color: var(--text-sub);
+      opacity: 0.9;
+    }
+
+    .log-window {
+      height: 200px;
+      overflow-y: auto;
+      padding: 10px;
+      font-size: 12px;
+      line-height: 1.6;
+      background: 
+        radial-gradient(circle at top, rgba(10,10,14,1), rgba(3,4,7,1)),
+        repeating-linear-gradient(
+          0deg,
+          transparent,
+          transparent 20px,
+          rgba(198,156,109,0.02) 20px,
+          rgba(198,156,109,0.02) 21px
+        );
+      border-radius: 12px;
+      border: 2px solid rgba(198,156,109,0.3);
+      box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
+    }
+
+    .log-entry {
+      margin-bottom: 4px;
+      display: flex;
+      gap: 6px;
+      align-items: baseline;
+      animation: logSlideIn 0.3s ease;
+    }
+
+    @keyframes logSlideIn {
+      from {
+        opacity: 0;
+        transform: translateX(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    .log-entry.combo {
+      animation: comboFlash 0.6s ease;
+    }
+
+    @keyframes comboFlash {
+      0%, 100% { background: transparent; }
+      50% { background: rgba(198,156,109,0.2); }
+    }
+
+    .log-label {
+      font-size: 9px;
+      padding: 1px 5px;
+      border-radius: 999px;
+      border: 1px solid rgba(198,156,109,0.33);
+      color: var(--accent-brass-soft);
+      min-width: 40px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    .log-label.ai {
+      color: #ffb347;
+      border-color: rgba(255,179,71,0.5);
+    }
+
+    .log-label.sys {
+      color: var(--accent-safe);
+      border-color: rgba(102,255,204,0.6);
+    }
+
+    .log-text {
+      color: var(--text-main);
+    }
+
+    .hint-text {
+      font-size: 9px;
+      color: var(--text-sub);
+      margin-top: 2px;
+    }
+
+    .input-area {
+      margin-top: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .station-input {
+      flex: 1;
+      padding: 8px 12px;
+      border-radius: 14px;
+      border: 2px solid rgba(198,156,109,0.5);
+      background: linear-gradient(135deg, #0a0b10, #05060a);
+      color: var(--text-main);
+      font-size: 13px;
+      outline: none;
+      box-shadow: 
+        inset 0 0 15px rgba(0,0,0,0.8),
+        0 0 10px rgba(198,156,109,0.1);
+      transition: all 0.3s ease;
+    }
+
+    .station-input:focus {
+      border-color: var(--accent-brass);
+      box-shadow:
+        0 0 20px rgba(198,156,109,0.5),
+        inset 0 0 15px rgba(0,0,0,1);
+      transform: scale(1.02);
+    }
+
+    .station-input::placeholder {
+      color: rgba(198,156,109,0.4);
+    }
+
+    .btn {
+      padding: 6px 10px;
+      border-radius: 14px;
+      border: 1px solid rgba(198,156,109,0.6);
+      background: radial-gradient(circle at top, #3a2b20, #080809);
+      color: var(--accent-brass);
+      font-size: 10px;
+      cursor: pointer;
+      box-shadow: var(--shadow-soft);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all var(--transition-fast);
+      white-space: nowrap;
+    }
+
+    .btn span.icon {
+      font-size: 11px;
+    }
+
+    .btn:hover {
+      background: radial-gradient(circle at top, #463222, #050509);
+      color: var(--text-main);
+      box-shadow: 0 0 20px rgba(198,156,109,0.6);
+      transform: translateY(-2px) scale(1.05);
+      transition: all 0.2s ease;
+    }
+
+    .btn:active {
+      transform: translateY(0) scale(0.98);
+    }
+
+    .btn-success {
+      animation: successPulse 0.5s ease;
+    }
+
+    @keyframes successPulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); box-shadow: 0 0 25px rgba(102,255,204,0.8); }
+      100% { transform: scale(1); }
+    }
+
+    .btn-error {
+      animation: errorShake 0.5s ease;
+    }
+
+    @keyframes errorShake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      75% { transform: translateX(5px); }
+    }
+
+    .btn-ghost {
+      background: transparent;
+      border-style: dashed;
+      opacity: 0.65;
+    }
+
+    .btn-ghost:hover {
+      opacity: 1;
+      background: rgba(198,156,109,0.08);
+    }
+
+    .timer-bar-wrap {
+      width: 100%;
+      height: 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(198,156,109,0.5);
+      overflow: hidden;
+      background: #050609;
+      position: relative;
+    }
+
+    .timer-bar-fill {
+      height: 100%;
+      width: 100%;
+      background: linear-gradient(to right, var(--accent-safe), #ffd54a, var(--accent-danger));
+      transform-origin: left center;
+      transition: transform 0.2s linear;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .timer-bar-fill::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(90deg, 
+        transparent, 
+        rgba(255,255,255,0.3), 
+        transparent
+      );
+      animation: timerShine 2s ease-in-out infinite;
+    }
+
+    @keyframes timerShine {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+
+    .timer-label {
+      font-size: 9px;
+      color: var(--text-sub);
+      display: flex;
+      justify-content: space-between;
+      margin-top: 2px;
+    }
+
+    .stats {
+      display: flex;
+      gap: 7px;
+      flex-wrap: wrap;
+      font-size: 9px;
+      color: var(--text-sub);
+      margin-top: 2px;
+    }
+
+    .stat-pill {
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 2px solid rgba(198,156,109,0.4);
+      background: radial-gradient(circle, rgba(198,156,109,0.1), transparent);
+      display: inline-flex;
+      gap: 5px;
+      align-items: center;
+      box-shadow: 0 0 10px rgba(198,156,109,0.2);
+      transition: all 0.3s ease;
+    }
+
+    .stat-pill:hover {
+      border-color: rgba(198,156,109,0.6);
+      box-shadow: 0 0 15px rgba(198,156,109,0.4);
+      transform: translateY(-1px);
+    }
+
+    .stat-label {
+      color: var(--accent-brass-soft);
+    }
+
+    .stat-value {
+      color: var(--accent-safe);
+      font-weight: 600;
+      font-size: 11px;
+      text-shadow: 0 0 8px rgba(102,255,204,0.5);
+      transition: all 0.3s ease;
+    }
+
+    .stat-value.updated {
+      animation: statUpdate 0.5s ease;
+    }
+
+    @keyframes statUpdate {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.3); color: #fff; }
+    }
+
+    .combo-display {
+      position: relative;
+    }
+
+    .combo-display.active::after {
+      content: "🔥";
+      position: absolute;
+      right: -15px;
+      animation: firePulse 0.5s ease infinite;
+    }
+
+    @keyframes firePulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.2); opacity: 0.8; }
+    }
+
+    /* 우측: AI / 적 / 정보 패널 */
+
+    .enemy-panel {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      gap: 8px;
+    }
+
+    .enemy-card {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      align-items: center;
+      padding: 16px;
+      border-radius: 20px;
+      background: 
+        radial-gradient(circle at center, rgba(198,156,109,0.12), transparent),
+        radial-gradient(circle at top left, rgba(198,156,109,0.08), transparent),
+        #050609;
+      border: 2px solid rgba(198,156,109,0.5);
+      box-shadow: 
+        0 0 40px rgba(198,156,109,0.3),
+        inset 0 0 30px rgba(0,0,0,0.6);
+      position: relative;
+      overflow: visible;
+    }
+
+    .enemy-card::after {
+      content: "⚙";
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 24px;
+      color: rgba(198,156,109,0.4);
+      animation: gearSpin 4s linear infinite;
+    }
+
+    @keyframes gearSpin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .steam-effect {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+      overflow: hidden;
+      border-radius: 20px;
+    }
+
+    .steam-effect::before,
+    .steam-effect::after {
+      content: "";
+      position: absolute;
+      width: 60px;
+      height: 60px;
+      background: radial-gradient(circle, rgba(198,156,109,0.2), transparent);
+      border-radius: 50%;
+      animation: steamRise 6s ease-in-out infinite;
+    }
+
+    .steam-effect::before {
+      left: 20%;
+      animation-delay: 0s;
+    }
+
+    .steam-effect::after {
+      right: 20%;
+      animation-delay: 3s;
+    }
+
+    @keyframes steamRise {
+      0% { transform: translateY(0) scale(0.8); opacity: 0.3; }
+      50% { transform: translateY(-30px) scale(1.2); opacity: 0.6; }
+      100% { transform: translateY(-60px) scale(1.5); opacity: 0; }
+    }
+
+    .enemy-avatar-wrap {
+      width: 180px;
+      height: 180px;
+      border-radius: 24px;
+      overflow: visible;
+      border: 3px solid rgba(198,156,109,0.8);
+      background: radial-gradient(circle, rgba(198,156,109,0.15), #010102);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      position: relative;
+      box-shadow: 
+        0 0 30px rgba(198,156,109,0.5),
+        inset 0 0 20px rgba(0,0,0,0.8);
+      animation: steamPulse 3s ease-in-out infinite;
+    }
+
+    @keyframes steamPulse {
+      0%, 100% { box-shadow: 0 0 30px rgba(198,156,109,0.5), inset 0 0 20px rgba(0,0,0,0.8); }
+      50% { box-shadow: 0 0 50px rgba(198,156,109,0.8), inset 0 0 20px rgba(0,0,0,0.8); }
+    }
+
+    .enemy-avatar-wrap::before {
+      content: "";
+      position: absolute;
+      top: -10px;
+      left: -10px;
+      right: -10px;
+      bottom: -10px;
+      border: 2px dashed rgba(198,156,109,0.3);
+      border-radius: 28px;
+      animation: gearRotate 8s linear infinite;
+    }
+
+    @keyframes gearRotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .enemy-avatar-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+      filter: drop-shadow(0 0 10px rgba(198,156,109,0.6));
+      animation: floatEnemy 4s ease-in-out infinite;
+    }
+
+    @keyframes floatEnemy {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-8px); }
+    }
+
+    .enemy-info {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      text-align: center;
+    }
+
+    .enemy-name {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--accent-brass);
+      text-shadow: 0 0 10px rgba(198,156,109,0.6);
+      letter-spacing: 1px;
+    }
+
+    .enemy-role {
+      font-size: 9px;
+      color: var(--text-sub);
+    }
+
+    .enemy-quip {
+      font-size: 9px;
+      color: var(--accent-safe);
+    }
+
+    .enemy-diff {
+      font-size: 8px;
+      color: var(--accent-brass-soft);
+      padding: 1px 5px;
+      border-radius: 999px;
+      border: 1px solid rgba(198,156,109,0.35);
+      align-self: flex-start;
+      margin-top: 1px;
+    }
+
+    .info-panel {
+      flex: 1;
+      padding: 6px;
+      background: radial-gradient(circle at top, rgba(198,156,109,0.04), transparent),
+                  #050609;
+      border-radius: 14px;
+      border: 1px solid rgba(198,156,109,0.25);
+      font-size: 9px;
+      color: var(--text-sub);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .info-panel strong {
+      color: var(--accent-brass-soft);
+      font-weight: 500;
+    }
+
+    .info-list {
+      list-style: none;
+      padding-left: 10px;
+      margin: 0;
+      display: grid;
+      gap: 2px;
+    }
+
+    .info-list li::before {
+      content: "⚙";
+      font-size: 7px;
+      margin-right: 4px;
+      color: rgba(198,156,109,0.7);
+    }
+
+
+
+    /* 스크롤바 */
+    ::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #050509;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(198,156,109,0.38);
+      border-radius: 999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(198,156,109,0.6);
+    }
+
+    @media (max-width: 840px) {
+      .main-layout {
+        grid-template-columns: 1fr;
+      }
+      .enemy-card {
+        order: -1;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="game-shell">
+  <div class="header">
+    <div class="title-block">
+      <div class="game-title">
+        <span>⚙ Steamline ⚙</span>
+        <span style="font-size:14px; color:#f5f5f5;">서울 지하철 스팀펑크 릴레이</span>
+      </div>
+      <div class="game-subtitle">
+        호선 선택 → 난이도 설정 → 역 이름을 릴레이로 입력하세요. AI 스팀 짐승들과의 두뇌 싸움에서 살아남으면 승리입니다.
+      </div>
+    </div>
+
+    <div class="mode-controls">
+      <div class="control-group">
+        <div class="select-steam">
+          <span class="label">호선</span>
+          <select id="lineSelect">
+            <option value="1">1호선</option>
+            <option value="2" selected>2호선</option>
+            <option value="3">3호선</option>
+            <option value="4">4호선</option>
+            <option value="5">5호선</option>
+            <option value="6">6호선</option>
+            <option value="7">7호선</option>
+            <option value="8">8호선</option>
+            <option value="9">9호선</option>
+          </select>
+        </div>
+      </div>
+      <div class="control-group">
+        <div class="select-steam">
+          <span class="label">난이도</span>
+          <select id="difficultySelect">
+            <option value="easy">초급</option>
+            <option value="normal" selected>중급</option>
+            <option value="hard">고급</option>
+            <option value="master">마스터</option>
+          </select>
+        </div>
+      </div>
+      <div class="control-group">
+        <div class="mode-tabs">
+          <div class="mode-tab active" data-mode="time">타임어택</div>
+          <div class="mode-tab" data-mode="rush">랜덤 러시</div>
+        </div>
+      </div>
+      <button class="btn btn-ghost" id="resetGameBtn" title="새 게임">
+        <span class="icon">↻</span> 리붓
+      </button>
+    </div>
+  </div>
+
+  <div class="main-layout">
+    <!-- 좌측: 메인 게임 패널 -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">
+          <span class="icon">⚙</span>
+          <span id="panelTitleText">타임어택 모드 진행중</span>
+        </div>
+        <div class="status-label" id="statusLabel">플레이어부터 시작합니다.</div>
+      </div>
+
+      <div class="log-window" id="logWindow"></div>
+
+      <div class="input-area">
+        <div class="input-row">
+          <input
+            id="stationInput"
+            class="station-input"
+            type="text"
+            placeholder="당신의 역 이름을 입력하세요. 예) 홍대입구"
+            autocomplete="off"
+          />
+          <button class="btn" id="submitBtn">
+            <span class="icon">▶</span> 제출
+          </button>
+          <button class="btn btn-ghost" id="hintBtn">
+            <span class="icon">?</span> 힌트
+          </button>
+        </div>
+        <div class="timer-bar-wrap">
+          <div class="timer-bar-fill" id="timerBar"></div>
+        </div>
+        <div class="timer-label">
+          <span id="timerText">남은 시간: --초</span>
+          <span id="turnText">현재 턴: 플레이어</span>
+        </div>
+        <div class="stats">
+          <div class="stat-pill">
+            <span class="stat-label">플레이어 점수</span>
+            <span class="stat-value" id="playerScore">0</span>
+          </div>
+          <div class="stat-pill">
+            <span class="stat-label">AI 점수</span>
+            <span class="stat-value" id="aiScore">0</span>
+          </div>
+          <div class="stat-pill">
+            <span class="stat-label">콤보</span>
+            <span class="stat-value" id="comboCount">0</span>
+          </div>
+          <div class="stat-pill">
+            <span class="stat-label">남은 목숨</span>
+            <span class="stat-value" id="lives">3</span>
+          </div>
+          <div class="stat-pill">
+            <span class="stat-label">사용한 역</span>
+            <span class="stat-value" id="usedCount">0</span>
+          </div>
+        </div>
+        <div class="hint-text" id="hintText">
+          난이도와 모드에 따라 허용되는 역 조건이 달라집니다. (초급: 대표역 위주, 마스터: 실제 인접역만 가능)
+        </div>
+      </div>
+
+    </div>
+
+    <!-- 우측: AI/적/정보 패널 -->
+    <div class="enemy-panel">
+      <div class="enemy-card">
+        <div class="steam-effect"></div>
+        <div class="enemy-avatar-wrap">
+          <img id="enemyAvatar" src="enemy-cat.png" alt="Steam AI Enemy">
+        </div>
+        <div class="enemy-info">
+          <div class="enemy-name" id="enemyName">⚙ 볼트 캣 : 라인 파괴자 ⚙</div>
+          <div class="enemy-role" id="enemyRole">
+            ⚡ 증기 기관으로 움직이는 기계 생명체. 지하철 노선을 완벽히 기억하는 스팀펑크 AI입니다.
+          </div>
+          <div class="enemy-quip" id="enemyQuip">
+            "네가 모르는 환승역은, 내가 사는巢야."
+          </div>
+          <div class="enemy-diff" id="enemyDiff">⚡ 중급 AI ⚡</div>
+        </div>
+      </div>
+
+      <div class="info-panel">
+        <div><strong>난이도 규칙 요약</strong></div>
+        <ul class="info-list" id="difficultyInfoList">
+          <li>초급: 대표역만 허용, 여유 있는 시간 제한, 힌트 적극 제공.</li>
+          <li>중급: 해당 호선 전체 역, 중복 시 패널티.</li>
+          <li>고급: 환승역 콤보 시스템. 환승역 입력 시 보너스 & 다음 턴 라인 체인.</li>
+          <li>마스터: 인접역 릴레이. 한 번의 실수가 치명적.</li>
+        </ul>
+
+        <div><strong>모드 설명</strong></div>
+        <ul class="info-list">
+          <li>타임어택: 제한 시간 동안 최대한 많은 역을 입력하세요!</li>
+          <li>랜덤 러시: 매 턴 호선이 랜덤으로 변경됩니다.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  /********************************************************************
+   * 서울 지하철 역 데이터 (요약 버전)
+   * - 실제 서비스 시, 서울교통공사 / 위키백과 등 공식 자료를 참고해
+   *   전체 역 목록 & 환승 정보로 확장하는 것을 권장합니다.
+   *   (여기서는 게임 데모용으로 대표 구간 위주 구성)
+   ********************************************************************/
+
+  const SUBWAY_DATA = {
+    "1": {
+      name: "1호선",
+      basic: ["서울역","시청","종각","종로3가","종로5가","동대문","청량리","신설동","용산","노량진","대방","신길","영등포","구로","부천","소사","인천"],
+      all: [
+        "소요산","동두천","보산","동두천중앙","지행","덕정","덕계","양주","녹양","가능","의정부",
+        "회룡","망월사","도봉산","도봉","방학","창동","녹천","월계","광운대","석계","신이문","외대앞",
+        "회기","청량리","제기동","신설동","동묘앞","동대문","종로5가","종로3가","종각","시청","서울역",
+        "남영","용산","노량진","대방","신길","영등포","신도림","구로","가산디지털단지","독산","금천구청","석수","관악","안양","명학","금정","군포","당정","의왕","성균관대","화서","수원","세류","병점","세마","오산대","오산","진위","송탄","서정리","평택지제","평택","성환","직산","두정","천안","봉명","쌍용","아산","탕정","배방","온양온천","신창",
+        "인천","동인천","주안","도화","제물포","도원","동암","백운","부평","부개","송내","중동","부천","소사","역곡","온수","오류동","개봉","구일"
+      ]
+    },
+    "2": {
+      name: "2호선",
+      basic: ["시청","을지로입구","을지로3가","을지로4가","동대문역사문화공원","왕십리","건대입구","잠실","강남","교대","서울대입구","신도림","문래","영등포구청","합정","홍대입구","신촌","이대"],
+      all: [
+        "시청","을지로입구","을지로3가","을지로4가","동대문역사문화공원","신당","상왕십리","왕십리","한양대",
+        "뚝섬","성수","건대입구","구의","강변","잠실나루","잠실","신천","종합운동장","삼성","선릉","역삼",
+        "강남","교대","서초","방배","사당","낙성대","서울대입구","봉천","신림","신대방","구로디지털단지",
+        "대림","신도림","문래","영등포구청","당산","합정","홍대입구","신촌","이대","아현","충정로",
+        "까치산","신정네거리","양천구청","도림천"
+      ]
+    },
+    "3": {
+      name: "3호선",
+      basic: ["대화","주엽","정발산","마두","백석","대곡","연신내","불광","경복궁","안국","종로3가","을지로3가","충무로","교대","양재","수서"],
+      all: [
+        "대화","주엽","정발산","마두","백석","대곡","화정","원당","원흥","삼송","지축","구파발","연신내","불광","녹번","홍제","무악재",
+        "독립문","경복궁","안국","종로3가","충무로","동대입구","약수","금호","옥수","압구정","신사","잠원","고속터미널",
+        "교대","남부터미널","양재","매봉","도곡","대치","학여울","대청","일원","수서","가락시장","경찰병원","오금"
+      ]
+    },
+    "4": {
+      name: "4호선",
+      basic: ["당고개","노원","창동","수유","미아사거리","성신여대입구","혜화","동대문","충무로","명동","서울역","숙대입구","삼각지","이촌","동작","사당","금정"],
+      all: [
+        "당고개","상계","노원","창동","쌍문","수유","미아","미아사거리","길음","성신여대입구",
+        "한성대입구","혜화","동대문","동대문역사문화공원","충무로","명동","회현","서울역",
+        "숙대입구","삼각지","신용산","이촌","동작","총신대입구","사당","남태령","선바위","경마공원","대공원",
+        "과천","정부과천청사","인덕원","평촌","범계","금정","산본","수리산","대야미","반월","상록수","한대앞","중앙","고잔","초지","안산","신길온천","정왕","오이도"
+      ]
+    },
+    "5": {
+      name: "5호선",
+      basic: ["방화","김포공항","여의도","공덕","충정로","광화문","종로3가","왕십리","천호","둔촌동","올림픽공원"],
+      all: [
+        "방화","개화산","김포공항","송정","마곡","발산","우장산","화곡","까치산","신정","목동","오목교","양평",
+        "영등포구청","여의도","여의나루","마포","공덕","애오개","충정로","서대문","광화문","종로3가",
+        "을지로4가","동대문역사문화공원","청구","신금호","행당","왕십리","마장","답십리","장한평","군자","아차산",
+        "광나루","천호","강동","길동","굽은다리","명일","고덕","상일동","둔촌동","올림픽공원","방이","개롱","거여","마천"
+      ]
+    },
+    "6": {
+      name: "6호선",
+      basic: ["응암","불광","연신내","디지털미디어시티","마포구청","대흥","공덕","삼각지","이태원","한강진"],
+      all: [
+        "응암","역촌","불광","독바위","연신내","구산","새절","증산","디지털미디어시티","월드컵경기장","마포구청",
+        "망원","합정","상수","광흥창","대흥","공덕","효창공원앞","삼각지","녹사평","이태원","한강진","버티고개",
+        "약수","청구","신당","동묘앞","창신","보문","안암","고려대","월곡","상월곡","돌곶이","석계","태릉입구",
+        "화랑대","봉화산","신내"
+      ]
+    },
+    "7": {
+      name: "7호선",
+      basic: ["장암","도봉산","노원","건대입구","군자","고속터미널","내방"],
+      all: [
+        "장암","도봉산","수락산","마들","노원","중계","하계","공릉","태릉입구","먹골","중화","상봉","면목",
+        "사가정","용마산","중곡","군자","어린이대공원","건대입구","뚝섬유원지","청담","강남구청","학동","논현",
+        "반포","고속터미널","내방","이수","남성","숭실대입구","상도","장승배기","신대방삼거리","보라매","신풍",
+        "대림","남구로","가산디지털단지","철산","광명사거리","천왕","온수"
+      ]
+    },
+    "8": {
+      name: "8호선",
+      basic: ["암사","천호","잠실","가락시장","복정","모란"],
+      all: [
+        "암사","천호","강동구청","몽촌토성","잠실","석촌","송파","가락시장","문정","장지","복정","산성","남한산성입구","단대오거리","신흥","수진","모란"
+      ]
+    },
+    "9": {
+      name: "9호선",
+      basic: ["개화","김포공항","염창","당산","노량진","동작","고속터미널","신논현","종합운동장"],
+      all: [
+        "개화","김포공항","공항시장","신방화","마곡나루","가양","증미","등촌","염창","신목동","선유도",
+        "당산","국회의사당","여의도","샛강","노량진","노들","흑석","동작","구반포","신반포","고속터미널",
+        "사평","신논현","언주","선정릉","삼성중앙","봉은사","종합운동장"
+      ]
+    }
+  };
+
+  // 난이도 & 적 캐릭터 정의
+  const DIFFICULTIES = {
+    easy: {
+      label: "초급",
+      timeLimit: 14,
+      lives: 4,
+      enableHints: true,
+      comboTransfers: false,
+      aiAccuracy: 0.25
+    },
+    normal: {
+      label: "중급",
+      timeLimit: 10,
+      lives: 3,
+      enableHints: true,
+      comboTransfers: false,
+      aiAccuracy: 0.92
+    },
+    hard: {
+      label: "고급",
+      timeLimit: 8,
+      lives: 3,
+      enableHints: true,
+      comboTransfers: true,
+      aiAccuracy: 0.97
+    },
+    master: {
+      label: "마스터",
+      timeLimit: 6,
+      lives: 1,
+      enableHints: false,
+      comboTransfers: true,
+      aiAccuracy: 0.995
+    }
+  };
+
+  const ENEMIES = {
+    easy: {
+      name: "기어 랫 : 톱니 쥐 서기관",
+      img: "enemy-rat.png",
+      diff: "초급 AI",
+      quip: "\"히히… 대표역만 외워도 충분하겠지?\""
+    },
+    normal: {
+      name: "볼트 캣 : 라인 파괴자",
+      img: "enemy-cat.png",
+      diff: "중급 AI",
+      quip: "\"지금부터 진짜 지식 싸움이야.\""
+    },
+    hard: {
+      name: "아이언 베어 : 환승 포식자",
+      img: "enemy-bear.png",
+      diff: "고급 AI",
+      quip: "\"환승역? 그건 내 밥이지.\""
+    },
+    master: {
+      name: "서펀트 드라이브 : 루트 심판자",
+      img: "enemy-snake.png",
+      diff: "마스터 AI",
+      quip: "\"인접역이 아니면, 존재할 가치도 없다.\""
+    }
+  };
+
+  // 인접 관계 (마스터 난이도용) - 일부 노선/구간 예시
+  const ADJACENCY = {};
+  function addAdjacency(lineKey, stations) {
+    for (let i = 0; i < stations.length - 1; i++) {
+      const a = stations[i], b = stations[i+1];
+      if (!ADJACENCY[a]) ADJACENCY[a] = new Set();
+      if (!ADJACENCY[b]) ADJACENCY[b] = new Set();
+      ADJACENCY[a].add(b);
+      ADJACENCY[b].add(a);
+    }
+  }
+  Object.keys(SUBWAY_DATA).forEach(lineKey => {
+    addAdjacency(lineKey, SUBWAY_DATA[lineKey].all);
+  });
+
+  // 역 → 포함 호선 맵 (환승 체크용)
+  const STATION_LINES = {};
+  Object.entries(SUBWAY_DATA).forEach(([lineKey, info]) => {
+    info.all.forEach(st => {
+      const key = normalizeStation(st);
+      if (!STATION_LINES[key]) STATION_LINES[key] = new Set();
+      STATION_LINES[key].add(lineKey);
+    });
+  });
+
+  /********************************************************************
+   * 게임 상태
+   ********************************************************************/
+  const state = {
+    mode: "time",
+    line: "2",
+    difficulty: "normal",
+    turn: "player",
+    used: new Set(),
+    lastStation: null,
+    playerScore: 0,
+    aiScore: 0,
+    combo: 0,
+    lives: DIFFICULTIES["normal"].lives,
+    timeLeft: DIFFICULTIES["normal"].timeLimit,
+    timerId: null,
+    chainLineLock: null // 환승 콤보용
+  };
+
+  /********************************************************************
+   * DOM - 전역 변수로 선언 (나중에 초기화)
+   ********************************************************************/
+  let el = {};
+
+  /********************************************************************
+   * 유틸
+   ********************************************************************/
+  function normalizeStation(name) {
+    if (!name) return "";
+    return name
+      .toString()
+      .trim()
+      .replace(/역$/,"")
+      .replace(/\s+/g,"")
+      .toLowerCase();
+  }
+  
+  // 디버깅용: 역 검증 함수
+  function debugValidateStation(input, lineKey) {
+    const info = SUBWAY_DATA[lineKey];
+    if (!info) return { found: false, reason: "호선 정보 없음" };
+    
+    const norm = normalizeStation(input);
+    const allNormalized = info.all.map(s => normalizeStation(s));
+    const basicNormalized = info.basic.map(s => normalizeStation(s));
+    
+    return {
+      input: input,
+      normalized: norm,
+      inAll: allNormalized.includes(norm),
+      inBasic: basicNormalized.includes(norm),
+      allStations: info.all,
+      normalizedAll: allNormalized
+    };
+  }
+
+  function log(type, text) {
+    const div = document.createElement("div");
+    div.className = "log-entry";
+    const label = document.createElement("div");
+    label.className = "log-label " + (type === "ai" ? "ai" : (type === "sys" ? "sys" : ""));
+    label.textContent = type === "player" ? "YOU" :
+                        type === "ai" ? "AI" : "SYS";
+    const span = document.createElement("div");
+    span.className = "log-text";
+    span.textContent = text;
+    div.appendChild(label);
+    div.appendChild(span);
+    el.logWindow.appendChild(div);
+    el.logWindow.scrollTop = el.logWindow.scrollHeight;
+  }
+
+  function shuffle(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  function resetTimer() {
+    if (state.timerId) clearInterval(state.timerId);
+    const cfg = DIFFICULTIES[state.difficulty];
+    state.timeLeft = cfg.timeLimit;
+    updateTimerUI();
+    state.timerId = setInterval(() => {
+      state.timeLeft--;
+      updateTimerUI();
+      if (state.timeLeft <= 0) {
+        clearInterval(state.timerId);
+        handleTimeout();
+      }
+    }, 1000);
+  }
+
+  function updateTimerUI() {
+    const cfg = DIFFICULTIES[state.difficulty];
+    const ratio = Math.max(0, Math.min(1, state.timeLeft / cfg.timeLimit));
+    el.timerBar.style.transform = `scaleX(${ratio})`;
+    el.timerText.textContent = `남은 시간: ${state.timeLeft > 0 ? state.timeLeft : 0}초`;
+    el.turnText.textContent = `현재 턴: ${state.turn === "player" ? "플레이어" : "AI"}`;
+  }
+
+  function updateStats() {
+    const playerScoreEl = el.playerScore;
+    const aiScoreEl = el.aiScore;
+    const comboEl = el.comboCount;
+    
+    if (playerScoreEl.textContent !== state.playerScore.toString()) {
+      playerScoreEl.textContent = state.playerScore;
+      playerScoreEl.classList.add("updated");
+      setTimeout(() => playerScoreEl.classList.remove("updated"), 500);
+    }
+    
+    if (aiScoreEl.textContent !== state.aiScore.toString()) {
+      aiScoreEl.textContent = state.aiScore;
+      aiScoreEl.classList.add("updated");
+      setTimeout(() => aiScoreEl.classList.remove("updated"), 500);
+    }
+    
+    comboEl.textContent = state.combo;
+    if (state.combo >= 3) {
+      comboEl.parentElement.classList.add("combo-display", "active");
+    } else {
+      comboEl.parentElement.classList.remove("active");
+    }
+    
+    el.lives.textContent = state.lives;
+    el.usedCount.textContent = state.used.size;
+  }
+
+  function isStationOnLine(lineKey, name) {
+    const info = SUBWAY_DATA[lineKey];
+    if (!info) return false;
+    const norm = normalizeStation(name);
+    const base = info.all.map(s => normalizeStation(s));
+    return base.includes(norm);
+  }
+
+  function pickEnemy() {
+    const enemyCfg = ENEMIES[state.difficulty];
+    el.enemyAvatar.src = enemyCfg.img;
+    el.enemyName.textContent = `⚙ ${enemyCfg.name} ⚙`;
+    el.enemyQuip.textContent = enemyCfg.quip;
+    el.enemyDiff.textContent = `⚡ ${enemyCfg.diff} ⚡`;
+    if (state.difficulty === "easy") {
+      el.enemyRole.textContent = "⚙ 기어와 톱니를 등에 짊어진 하수 AI. 대표역 위주로 상대해줍니다.";
+    } else if (state.difficulty === "normal") {
+      el.enemyRole.textContent = "⚡ 전 구간 역을 뒤지는 전기 고양이. 실수를 그냥 넘어가지 않습니다.";
+    } else if (state.difficulty === "hard") {
+      el.enemyRole.textContent = "🔥 환승역을 집어삼키는 철갑 곰. 콤보 룰을 적극 활용합니다.";
+    } else {
+      el.enemyRole.textContent = "💀 노선 전체를 기억하는 증기 뱀 엔진. 인접역 규칙으로 당신을 압박합니다.";
+    }
+  }
+
+
+  function updateDifficultyInfo() {
+    const cfg = DIFFICULTIES[state.difficulty];
+    let html = "";
+    if (state.difficulty === "easy") {
+      html += "<li>⚙ 모든 역 입력 가능</li>";
+      html += "<li>⏱ 시간 여유: " + cfg.timeLimit + "초, 넉넉한 목숨</li>";
+      html += "<li>💡 힌트 버튼으로 초성/후보 역 제공</li>";
+      html += "<li>🤖 AI 정확도: " + (cfg.aiAccuracy * 100).toFixed(0) + "%</li>";
+    } else if (state.difficulty === "normal") {
+      html += "<li>⚡ 모든 역 입력 가능</li>";
+      html += "<li>⏱ 시간 제한: " + cfg.timeLimit + "초</li>";
+      html += "<li>🤖 AI 정확도: " + (cfg.aiAccuracy * 100).toFixed(0) + "%</li>";
+    } else if (state.difficulty === "hard") {
+      html += "<li>🔥 모든 역 입력 가능</li>";
+      html += "<li>⚡ 환승역 입력 시 보너스 점수</li>";
+      html += "<li>⏱ 시간 제한: " + cfg.timeLimit + "초</li>";
+      html += "<li>🤖 AI 정확도: " + (cfg.aiAccuracy * 100).toFixed(0) + "%</li>";
+    } else {
+      html += "<li>💀 모든 역 입력 가능</li>";
+      html += "<li>⚡ 환승역 입력 시 보너스 점수</li>";
+      html += "<li>⏱ 시간 제한: " + cfg.timeLimit + "초</li>";
+      html += "<li>🤖 AI 정확도: " + (cfg.aiAccuracy * 100).toFixed(0) + "%</li>";
+    }
+    el.difficultyInfoList.innerHTML = html;
+  }
+
+  function validateStation(name) {
+    if (!name || typeof name !== 'string') {
+      return { valid: false, reason: "역 이름을 입력하세요." };
+    }
+    
+    const trimmed = name.trim();
+    if (trimmed === "") {
+      return { valid: false, reason: "역 이름을 입력하세요." };
+    }
+    
+    const norm = normalizeStation(trimmed);
+    if (norm === "") {
+      return { valid: false, reason: "올바른 역 이름을 입력하세요." };
+    }
+    
+    const cfg = DIFFICULTIES[state.difficulty];
+    const info = SUBWAY_DATA[state.line];
+    
+    if (!info) {
+      return { valid: false, reason: "호선 정보를 찾을 수 없습니다." };
+    }
+    
+    // 모든 난이도에서 전체 역 목록 사용
+    const stationList = info.all;
+    const normalizedList = stationList.map(s => normalizeStation(s));
+    
+    // 디버깅: 역 목록 확인
+    if (!normalizedList.includes(norm)) {
+      // 정확한 매칭을 위해 다시 한 번 확인
+      const exactMatch = stationList.find(s => normalizeStation(s) === norm);
+      if (!exactMatch) {
+        // 디버깅 정보 출력
+        console.log("역 검증 실패:", {
+          입력: trimmed,
+          정규화: norm,
+          호선: info.name,
+          사용가능역수: stationList.length,
+          정규화된목록: normalizedList.slice(0, 20)
+        });
+        return { valid: false, reason: `${info.name}에 존재하지 않는 역입니다. (입력: "${trimmed}")` };
+      }
+    }
+    
+    if (state.used.has(norm)) {
+      return { valid: false, reason: "이미 사용한 역입니다." };
+    }
+    
+    // 타임어택 모드에서는 같은 역 연속 입력 허용 (빠른 입력을 위해)
+    
+    return { valid: true, station: trimmed, normalized: norm };
+  }
+
+  function handleSubmit() {
+    if (state.turn !== "player") {
+      log("sys", "⚠️ 아직 당신의 턴이 아닙니다!");
+      return;
+    }
+    
+    if (!el.stationInput || !el.stationInput.value) {
+      log("sys", "⚠️ 입력 필드를 찾을 수 없습니다!");
+      return;
+    }
+    
+    const input = el.stationInput.value;
+    const result = validateStation(input);
+    
+    if (!result.valid) {
+      el.submitBtn.classList.add("btn-error");
+      setTimeout(() => el.submitBtn.classList.remove("btn-error"), 500);
+      const errorMessages = [
+        `❌ ${result.reason}`,
+        `💀 ${result.reason} 목숨이 감소합니다!`,
+        `⚠️ ${result.reason} 조심하세요!`
+      ];
+      log("sys", errorMessages[Math.floor(Math.random() * errorMessages.length)]);
+      state.lives--;
+      state.combo = 0;
+      updateStats();
+      if (state.lives <= 0) {
+        endGame(false);
+        return;
+      }
+      el.statusLabel.textContent = `💀 목숨 ${state.lives}개 남음! 집중하세요!`;
+      return;
+    }
+    
+    state.used.add(result.normalized);
+    state.lastStation = result.station;
+    state.playerScore++;
+    state.combo++;
+    
+    if (state.combo === 3) {
+      log("sys", "🔥 3콤보 달성! 보너스 점수 +1!");
+      state.playerScore++;
+    } else if (state.combo === 5) {
+      log("sys", "⚡ 5콤보 달성! 대단합니다! 보너스 점수 +2!");
+      state.playerScore += 2;
+    } else if (state.combo === 10) {
+      log("sys", "🎉 10콤보 달성! 전설적인 플레이! 보너스 점수 +5!");
+      state.playerScore += 5;
+    }
+    
+    const isTransfer = STATION_LINES[result.normalized] && STATION_LINES[result.normalized].size > 1;
+    if (isTransfer && DIFFICULTIES[state.difficulty].comboTransfers) {
+      state.playerScore += 2;
+      log("player", `🔥 ${result.station} ⚡ 환승역 보너스! +2점 획득! 🔥`);
+      const entry = el.logWindow.lastElementChild;
+      if (entry) entry.classList.add("combo");
+      el.statusLabel.textContent = "⚡ 환승역 콤보! 대단합니다!";
+    } else if (state.combo >= 5) {
+      log("player", `⚡ ${result.station} 🔥 ${state.combo}콤보 달성!`);
+      el.statusLabel.textContent = `🔥 ${state.combo}콤보! 계속 이어가세요!`;
+    } else {
+      log("player", `✅ ${result.station}`);
+      el.statusLabel.textContent = "좋습니다! 계속 이어가세요!";
+    }
+    
+    el.stationInput.value = "";
+    el.submitBtn.classList.add("btn-success");
+    setTimeout(() => el.submitBtn.classList.remove("btn-success"), 500);
+    
+    updateStats();
+    resetTimer();
+    
+    setTimeout(() => {
+      state.turn = "ai";
+      aiTurn();
+    }, 1000);
+  }
+
+  function aiTurn() {
+    if (state.turn !== "ai") return;
+    
+    const cfg = DIFFICULTIES[state.difficulty];
+    const info = SUBWAY_DATA[state.line];
+    // 모든 난이도에서 전체 역 목록 사용
+    const stationList = info.all;
+    const available = stationList.filter(s => {
+      const norm = normalizeStation(s);
+      if (state.used.has(norm)) return false;
+      return true;
+    });
+    
+    if (available.length === 0) {
+      log("ai", "🤖 패배... 더 이상 사용할 역이 없습니다.");
+      endGame(true);
+      return;
+    }
+    
+    let chosen;
+    if (Math.random() < cfg.aiAccuracy) {
+      if (cfg.comboTransfers) {
+        const transfers = available.filter(s => {
+          const norm = normalizeStation(s);
+          return STATION_LINES[norm] && STATION_LINES[norm].size > 1;
+        });
+        if (transfers.length > 0 && Math.random() < 0.6) {
+          chosen = transfers[Math.floor(Math.random() * transfers.length)];
+        } else {
+          chosen = available[Math.floor(Math.random() * available.length)];
+        }
+      } else {
+        chosen = available[Math.floor(Math.random() * available.length)];
+      }
+    } else {
+      const wrong = stationList.filter(s => !state.used.has(normalizeStation(s)));
+      chosen = wrong[Math.floor(Math.random() * wrong.length)] || available[0];
+    }
+    
+    const norm = normalizeStation(chosen);
+    state.used.add(norm);
+    state.lastStation = chosen;
+    state.aiScore++;
+    
+    const isTransfer = STATION_LINES[norm] && STATION_LINES[norm].size > 1;
+    if (isTransfer && cfg.comboTransfers) {
+      state.aiScore += 2;
+      log("ai", `⚙️ ${chosen} 🔥 AI가 환승역 보너스를 획득했습니다!`);
+      const entry = el.logWindow.lastElementChild;
+      if (entry) entry.classList.add("combo");
+    } else {
+      const quips = [
+        `⚙️ ${chosen}`,
+        `🤖 ${chosen} (AI 턴)`,
+        `⚡ ${chosen} (기계의 선택)`
+      ];
+      log("ai", quips[Math.floor(Math.random() * quips.length)]);
+    }
+    
+    updateStats();
+    resetTimer();
+    
+    setTimeout(() => {
+      state.turn = "player";
+      el.statusLabel.textContent = "당신의 차례입니다!";
+    }, 1500);
+  }
+
+  function handleTimeout() {
+    if (state.turn === "player") {
+      log("sys", "⏰ 시간 초과! 💀 목숨이 1개 감소했습니다...");
+      state.lives--;
+      updateStats();
+      if (state.lives <= 0) {
+        endGame(false);
+        return;
+      }
+      log("sys", `💪 남은 목숨: ${state.lives}개! 다시 집중하세요!`);
+      state.turn = "ai";
+      setTimeout(aiTurn, 500);
+    }
+  }
+
+  function endGame(playerWon) {
+    if (state.timerId) clearInterval(state.timerId);
+    if (playerWon) {
+      log("sys", `🎉🎉🎉 승리! 🎉🎉🎉`);
+      log("sys", `⚡ 최종 점수: 플레이어 ${state.playerScore} vs AI ${state.aiScore}`);
+      log("sys", `🔥 최대 콤보: ${state.combo}콤보!`);
+      el.statusLabel.textContent = "🎉 승리했습니다! 스팀펑크 AI를 물리쳤습니다!";
+      el.statusLabel.style.color = "var(--accent-safe)";
+      el.statusLabel.style.textShadow = "0 0 15px rgba(102,255,204,0.8)";
+    } else {
+      log("sys", `💀 패배... 기계에게 당했습니다...`);
+      log("sys", `⚡ 최종 점수: 플레이어 ${state.playerScore} vs AI ${state.aiScore}`);
+      log("sys", `💪 다시 도전해보세요!`);
+      el.statusLabel.textContent = "💀 패배했습니다... 다시 도전하세요!";
+      el.statusLabel.style.color = "var(--accent-danger)";
+      el.statusLabel.style.textShadow = "0 0 15px rgba(255,77,77,0.8)";
+    }
+    state.turn = "ended";
+  }
+
+  function resetGame() {
+    if (state.timerId) clearInterval(state.timerId);
+    state.turn = "player";
+    state.used.clear();
+    state.lastStation = null;
+    state.playerScore = 0;
+    state.aiScore = 0;
+    state.combo = 0;
+    const cfg = DIFFICULTIES[state.difficulty];
+    state.lives = cfg.lives;
+    state.timeLeft = cfg.timeLimit;
+    state.chainLineLock = null;
+    
+    el.logWindow.innerHTML = "";
+    el.stationInput.value = "";
+    el.statusLabel.textContent = "⚙️ 게임 시작! 역 이름을 입력하세요!";
+    el.statusLabel.style.color = "";
+    el.statusLabel.style.textShadow = "";
+    updateStats();
+    updateTimerUI();
+    log("sys", "🎮 " + SUBWAY_DATA[state.line].name + " 타임어택 게임 시작!");
+    log("sys", "⚡ " + ENEMIES[state.difficulty].name + "와의 대결입니다!");
+    log("sys", "💡 힌트 버튼을 눌러 도움을 받을 수 있습니다.");
+  }
+
+  function showHint() {
+    const cfg = DIFFICULTIES[state.difficulty];
+    if (!cfg.enableHints) {
+      log("sys", "⚠️ 이 난이도에서는 힌트를 사용할 수 없습니다. 💀");
+      return;
+    }
+    
+    const info = SUBWAY_DATA[state.line];
+    // 모든 난이도에서 전체 역 목록 사용
+    const stationList = info.all;
+    const available = stationList.filter(s => !state.used.has(normalizeStation(s)));
+    
+    if (available.length === 0) {
+      log("sys", "⚠️ 사용 가능한 역이 없습니다...");
+      return;
+    }
+    
+    const hint = available[Math.floor(Math.random() * available.length)];
+    const firstChar = hint.charAt(0);
+    const hints = [
+      `💡 힌트: "${firstChar}"로 시작하는 역이 있습니다!`,
+      `🔍 "${firstChar}"로 시작하는 역을 찾아보세요!`,
+      `⚙️ 기계가 알려드립니다: "${firstChar}"로 시작하는 역이 남아있습니다!`
+    ];
+    log("sys", hints[Math.floor(Math.random() * hints.length)]);
+  }
+
+  /********************************************************************
+   * DOM 요소 초기화
+   ********************************************************************/
+  function initDOM() {
+    el = {
+      lineSelect: document.getElementById("lineSelect"),
+      difficultySelect: document.getElementById("difficultySelect"),
+      modeTabs: document.querySelectorAll(".mode-tab"),
+      logWindow: document.getElementById("logWindow"),
+      stationInput: document.getElementById("stationInput"),
+      submitBtn: document.getElementById("submitBtn"),
+      hintBtn: document.getElementById("hintBtn"),
+      timerBar: document.getElementById("timerBar"),
+      timerText: document.getElementById("timerText"),
+      turnText: document.getElementById("turnText"),
+      statusLabel: document.getElementById("statusLabel"),
+      panelTitleText: document.getElementById("panelTitleText"),
+      playerScore: document.getElementById("playerScore"),
+      aiScore: document.getElementById("aiScore"),
+      comboCount: document.getElementById("comboCount"),
+      lives: document.getElementById("lives"),
+      usedCount: document.getElementById("usedCount"),
+      hintText: document.getElementById("hintText"),
+      resetGameBtn: document.getElementById("resetGameBtn"),
+      enemyAvatar: document.getElementById("enemyAvatar"),
+      enemyName: document.getElementById("enemyName"),
+      enemyRole: document.getElementById("enemyRole"),
+      enemyQuip: document.getElementById("enemyQuip"),
+      enemyDiff: document.getElementById("enemyDiff"),
+      difficultyInfoList: document.getElementById("difficultyInfoList")
+    };
+  }
+
+  /********************************************************************
+   * 이벤트 리스너
+   ********************************************************************/
+  function setupEventListeners() {
+    if (!el.lineSelect || !el.difficultySelect || !el.submitBtn || !el.hintBtn || !el.resetGameBtn) {
+      console.error("DOM 요소를 찾을 수 없습니다!", el);
+      return;
+    }
+
+    el.lineSelect.addEventListener("change", () => {
+      state.line = el.lineSelect.value;
+      resetGame();
+    });
+
+    el.difficultySelect.addEventListener("change", () => {
+      state.difficulty = el.difficultySelect.value;
+      const cfg = DIFFICULTIES[state.difficulty];
+      state.lives = cfg.lives;
+      pickEnemy();
+      updateDifficultyInfo();
+      updateStats();
+      resetGame();
+    });
+
+    el.modeTabs.forEach(tab => {
+      tab.addEventListener("click", () => {
+        el.modeTabs.forEach(t => t.classList.remove("active"));
+        tab.classList.add("active");
+        state.mode = tab.dataset.mode;
+        el.panelTitleText.textContent = tab.textContent + " 모드 진행중";
+        resetGame();
+      });
+    });
+
+    el.submitBtn.addEventListener("click", handleSubmit);
+    el.stationInput.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") handleSubmit();
+    });
+
+    el.hintBtn.addEventListener("click", showHint);
+    el.resetGameBtn.addEventListener("click", resetGame);
+  }
+
+  /********************************************************************
+   * 초기화
+   ********************************************************************/
+  function initGame() {
+    pickEnemy();
+    updateDifficultyInfo();
+    updateStats();
+    resetGame();
+  }
+
+  // DOM이 로드된 후 실행
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      initDOM();
+      setupEventListeners();
+      initGame();
+    });
+  } else {
+    // 이미 로드된 경우
+    initDOM();
+    setupEventListeners();
+    initGame();
+  }
+</script>
+</body>
+</html>
