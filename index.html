@@ -790,12 +790,245 @@
       background: rgba(198,156,109,0.6);
     }
 
+    /* 파티클 효과 */
+    .particle-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 9999;
+      overflow: hidden;
+    }
+
+    .particle {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      pointer-events: none;
+      animation: particleFloat 1.5s ease-out forwards;
+      --move-x: 0px;
+      --move-y: -100px;
+    }
+
+    .particle.combo {
+      background: radial-gradient(circle, #ffd700, #ff6b6b);
+      box-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+    }
+
+    .particle.error {
+      background: radial-gradient(circle, #ff4d4d, #cc0000);
+      box-shadow: 0 0 10px rgba(255, 77, 77, 0.8);
+    }
+
+    .particle.bonus {
+      background: radial-gradient(circle, #66ffcc, #00ff88);
+      box-shadow: 0 0 15px rgba(102, 255, 204, 0.9);
+      width: 12px;
+      height: 12px;
+    }
+
+    @keyframes particleFloat {
+      0% {
+        opacity: 1;
+        transform: translate(0, 0) scale(1);
+      }
+      100% {
+        opacity: 0;
+        transform: translate(var(--move-x, 0px), var(--move-y, -100px)) scale(0.3);
+      }
+    }
+
+    /* 역 지도 시각화 */
+    .map-container {
+      margin-top: 10px;
+      padding: 10px;
+      background: radial-gradient(circle at top, rgba(198,156,109,0.06), transparent),
+                  rgba(7,7,11,0.98);
+      border-radius: 12px;
+      border: 1px solid rgba(198,156,109,0.3);
+      max-height: 150px;
+      overflow-y: auto;
+    }
+
+    .map-visualization {
+      position: relative;
+      min-height: 60px;
+      padding: 10px 0;
+    }
+
+    .map-line {
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, 
+        transparent,
+        rgba(198,156,109,0.5),
+        rgba(198,156,109,0.8),
+        rgba(198,156,109,0.5),
+        transparent
+      );
+      transform: translateY(-50%);
+      border-radius: 2px;
+    }
+
+    .map-stations {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .map-station {
+      padding: 4px 8px;
+      background: radial-gradient(circle, rgba(198,156,109,0.3), rgba(198,156,109,0.1));
+      border: 2px solid rgba(198,156,109,0.6);
+      border-radius: 12px;
+      font-size: 10px;
+      color: var(--accent-brass);
+      animation: stationAppear 0.5s ease;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 0 8px rgba(198,156,109,0.3);
+    }
+
+    .map-station:hover {
+      transform: scale(1.1);
+      box-shadow: 0 0 15px rgba(198,156,109,0.6);
+      border-color: var(--accent-brass);
+    }
+
+    .map-station.recent {
+      animation: stationHighlight 0.8s ease;
+      border-color: var(--accent-safe);
+      box-shadow: 0 0 12px rgba(102,255,204,0.6);
+    }
+
+    .map-station.bonus {
+      border-color: #66ffcc;
+      background: radial-gradient(circle, rgba(102,255,204,0.4), rgba(102,255,204,0.1));
+      box-shadow: 0 0 15px rgba(102,255,204,0.8);
+    }
+
+    .map-station.ai {
+      border-color: rgba(255,179,71,0.6);
+      background: radial-gradient(circle, rgba(255,179,71,0.2), rgba(255,179,71,0.05));
+      opacity: 0.7;
+    }
+
+    @keyframes stationAppear {
+      from {
+        opacity: 0;
+        transform: scale(0.5) translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+
+    @keyframes stationHighlight {
+      0%, 100% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.2);
+        box-shadow: 0 0 20px rgba(102,255,204,0.9);
+      }
+    }
+
+    /* 보너스 라운드 오버레이 */
+    .bonus-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle, rgba(102,255,204,0.3), rgba(198,156,109,0.2));
+      z-index: 10000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(5px);
+      animation: bonusFlash 0.5s ease;
+    }
+
+    .bonus-overlay.active {
+      display: flex;
+    }
+
+    .bonus-content {
+      text-align: center;
+      color: var(--text-main);
+      animation: bonusPulse 1s ease infinite;
+    }
+
+    .bonus-title {
+      font-size: 48px;
+      font-weight: 700;
+      color: #66ffcc;
+      text-shadow: 
+        0 0 20px rgba(102,255,204,0.8),
+        0 0 40px rgba(102,255,204,0.6);
+      margin-bottom: 20px;
+    }
+
+    .bonus-text {
+      font-size: 24px;
+      color: var(--accent-brass);
+      text-shadow: 0 0 15px rgba(198,156,109,0.8);
+    }
+
+    @keyframes bonusFlash {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+
+    @keyframes bonusPulse {
+      0%, 100% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.05);
+      }
+    }
+
+    /* 스트릭 강조 효과 */
+    .stat-pill.streak-active {
+      border-color: #ffd700;
+      background: radial-gradient(circle, rgba(255,215,0,0.2), transparent);
+      box-shadow: 0 0 20px rgba(255,215,0,0.5);
+      animation: streakGlow 1s ease infinite;
+    }
+
+    @keyframes streakGlow {
+      0%, 100% {
+        box-shadow: 0 0 20px rgba(255,215,0,0.5);
+      }
+      50% {
+        box-shadow: 0 0 30px rgba(255,215,0,0.8);
+      }
+    }
+
     @media (max-width: 840px) {
       .main-layout {
         grid-template-columns: 1fr;
       }
       .enemy-card {
         order: -1;
+      }
+      .map-container {
+        max-height: 120px;
       }
     }
   </style>
@@ -866,6 +1099,20 @@
 
       <div class="log-window" id="logWindow"></div>
 
+      <!-- 역 지도 시각화 -->
+      <div class="map-container" id="mapContainer">
+        <div class="panel-header">
+          <div class="panel-title">
+            <span class="icon">🗺️</span>
+            <span>방문한 역 지도</span>
+          </div>
+        </div>
+        <div class="map-visualization" id="mapVisualization">
+          <div class="map-line" id="mapLine"></div>
+          <div class="map-stations" id="mapStations"></div>
+        </div>
+      </div>
+
       <div class="input-area">
         <div class="input-row">
           <input
@@ -901,6 +1148,10 @@
           <div class="stat-pill">
             <span class="stat-label">콤보</span>
             <span class="stat-value" id="comboCount">0</span>
+          </div>
+          <div class="stat-pill">
+            <span class="stat-label">스트릭</span>
+            <span class="stat-value" id="streakCount">0</span>
           </div>
           <div class="stat-pill">
             <span class="stat-label">남은 목숨</span>
@@ -957,6 +1208,17 @@
         </ul>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- 파티클 컨테이너 -->
+<div class="particle-container" id="particleContainer"></div>
+
+<!-- 보너스 라운드 오버레이 -->
+<div class="bonus-overlay" id="bonusOverlay">
+  <div class="bonus-content">
+    <div class="bonus-title">🎉 보너스 라운드! 🎉</div>
+    <div class="bonus-text" id="bonusText">보너스 점수를 획득했습니다!</div>
   </div>
 </div>
 
@@ -1163,11 +1425,14 @@
     playerScore: 0,
     aiScore: 0,
     combo: 0,
+    streak: 0, // 연속 입력 성공 횟수
     lives: DIFFICULTIES["normal"].lives,
     aiLives: DIFFICULTIES["normal"].lives, // AI 생명력 추가
     timeLeft: DIFFICULTIES["normal"].timeLimit,
     timerId: null,
-    chainLineLock: null // 환승 콤보용
+    chainLineLock: null, // 환승 콤보용
+    visitedStations: [], // 지도 시각화용 방문한 역 목록
+    bonusActive: false // 보너스 라운드 활성화 여부
   };
 
   /********************************************************************
@@ -1231,6 +1496,145 @@
     return arr;
   }
 
+  /********************************************************************
+   * 파티클 효과
+   ********************************************************************/
+  function createParticles(x, y, type = "combo", count = 15) {
+    const container = el.particleContainer;
+    if (!container) return;
+
+    for (let i = 0; i < count; i++) {
+      const particle = document.createElement("div");
+      particle.className = `particle ${type}`;
+      
+      const angle = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.5;
+      const distance = 60 + Math.random() * 40;
+      const startX = x + (Math.random() - 0.5) * 40;
+      const startY = y + (Math.random() - 0.5) * 40;
+      
+      const moveX = Math.cos(angle) * distance;
+      const moveY = Math.sin(angle) * distance - 80 - Math.random() * 40;
+      
+      particle.style.left = startX + "px";
+      particle.style.top = startY + "px";
+      particle.style.setProperty("--move-x", moveX + "px");
+      particle.style.setProperty("--move-y", moveY + "px");
+      
+      container.appendChild(particle);
+      
+      setTimeout(() => {
+        if (particle.parentNode) {
+          particle.remove();
+        }
+      }, 1500);
+    }
+  }
+
+  function createParticlesAtElement(element, type = "combo", count = 15) {
+    if (!element) return;
+    const rect = element.getBoundingClientRect();
+    const x = rect.left + rect.width / 2;
+    const y = rect.top + rect.height / 2;
+    createParticles(x, y, type, count);
+  }
+
+  /********************************************************************
+   * 역 지도 시각화
+   ********************************************************************/
+  function updateMapVisualization() {
+    const mapStations = el.mapStations;
+    if (!mapStations) return;
+
+    mapStations.innerHTML = "";
+    
+    state.visitedStations.forEach((station, index) => {
+      const stationEl = document.createElement("div");
+      stationEl.className = "map-station";
+      if (index === state.visitedStations.length - 1) {
+        stationEl.classList.add("recent");
+        setTimeout(() => stationEl.classList.remove("recent"), 800);
+      }
+      if (station.isBonus) {
+        stationEl.classList.add("bonus");
+      }
+      if (station.isAI) {
+        stationEl.classList.add("ai");
+        stationEl.title = `AI 방문: ${station.name} (순서: ${index + 1})`;
+      } else {
+        stationEl.title = `플레이어 방문: ${station.name} (순서: ${index + 1})`;
+      }
+      stationEl.textContent = station.name;
+      mapStations.appendChild(stationEl);
+    });
+  }
+
+  /********************************************************************
+   * 보너스 라운드 체크
+   ********************************************************************/
+  function checkBonusRound(stationName) {
+    // 특정 역들에 보너스 라운드 적용 (예: 유명 역, 환승역 등)
+    const bonusStations = {
+      "홍대입구": { points: 5, time: 5, message: "홍대입구 보너스! +5점, +5초!" },
+      "강남": { points: 5, time: 5, message: "강남 보너스! +5점, +5초!" },
+      "서울역": { points: 10, time: 10, message: "서울역 메가 보너스! +10점, +10초!" },
+      "잠실": { points: 3, time: 3, message: "잠실 보너스! +3점, +3초!" },
+      "명동": { points: 3, time: 3, message: "명동 보너스! +3점, +3초!" },
+      "이태원": { points: 3, time: 3, message: "이태원 보너스! +3점, +3초!" },
+      "종로3가": { points: 4, time: 4, message: "종로3가 환승 보너스! +4점, +4초!" },
+      "건대입구": { points: 3, time: 3, message: "건대입구 보너스! +3점, +3초!" }
+    };
+
+    const norm = normalizeStation(stationName);
+    // 원본 이름과 정규화된 이름 모두 체크
+    let bonusInfo = bonusStations[stationName];
+    if (!bonusInfo) {
+      const matchedKey = Object.keys(bonusStations).find(key => normalizeStation(key) === norm);
+      if (matchedKey) {
+        bonusInfo = bonusStations[matchedKey];
+      }
+    }
+
+    if (bonusInfo) {
+      state.bonusActive = true;
+      state.playerScore += bonusInfo.points;
+      state.timeLeft = Math.min(state.timeLeft + bonusInfo.time, DIFFICULTIES[state.difficulty].timeLimit * 2);
+      
+      // 보너스 오버레이 표시
+      if (el.bonusText) el.bonusText.textContent = bonusInfo.message;
+      if (el.bonusOverlay) el.bonusOverlay.classList.add("active");
+      
+      // 파티클 효과
+      if (el.stationInput) createParticlesAtElement(el.stationInput, "bonus", 30);
+      
+      setTimeout(() => {
+        if (el.bonusOverlay) el.bonusOverlay.classList.remove("active");
+        state.bonusActive = false;
+      }, 2000);
+
+      return true;
+    }
+
+    // 랜덤 보너스 (5% 확률)
+    if (Math.random() < 0.05) {
+      const randomPoints = Math.floor(Math.random() * 3) + 2;
+      const randomTime = Math.floor(Math.random() * 3) + 2;
+      state.playerScore += randomPoints;
+      state.timeLeft = Math.min(state.timeLeft + randomTime, DIFFICULTIES[state.difficulty].timeLimit * 2);
+      
+      if (el.bonusText) el.bonusText.textContent = `🎁 랜덤 보너스! +${randomPoints}점, +${randomTime}초!`;
+      if (el.bonusOverlay) el.bonusOverlay.classList.add("active");
+      if (el.stationInput) createParticlesAtElement(el.stationInput, "bonus", 25);
+      
+      setTimeout(() => {
+        if (el.bonusOverlay) el.bonusOverlay.classList.remove("active");
+      }, 2000);
+
+      return true;
+    }
+
+    return false;
+  }
+
   function resetTimer() {
     if (state.timerId) clearInterval(state.timerId);
     const cfg = DIFFICULTIES[state.difficulty];
@@ -1281,6 +1685,18 @@
     el.lives.textContent = state.lives;
     el.aiLives.textContent = state.aiLives;
     el.usedCount.textContent = state.used.size;
+    
+    // 스트릭 업데이트
+    const streakEl = el.streakCount;
+    if (streakEl) {
+      streakEl.textContent = state.streak;
+      const streakPill = streakEl.parentElement;
+      if (state.streak >= 5) {
+        streakPill.classList.add("streak-active");
+      } else {
+        streakPill.classList.remove("streak-active");
+      }
+    }
   }
 
   function isStationOnLine(lineKey, name) {
@@ -1434,6 +1850,8 @@
       log("sys", errorMessages[Math.floor(Math.random() * errorMessages.length)]);
       state.lives--;
       state.combo = 0;
+      state.streak = 0; // 스트릭 초기화
+      createParticlesAtElement(el.submitBtn, "error", 20); // 에러 파티클
       updateStats();
       if (state.lives <= 0) {
         endGame(false);
@@ -1447,21 +1865,44 @@
     state.lastStation = result.station;
     state.playerScore++;
     state.combo++;
+    state.streak++; // 스트릭 증가
+    
+    // 지도에 역 추가
+    const isBonus = checkBonusRound(result.station);
+    state.visitedStations.push({
+      name: result.station,
+      isBonus: isBonus,
+      isAI: false
+    });
+    updateMapVisualization();
+    
+    // 스트릭 보너스
+    if (state.streak >= 5 && state.streak % 5 === 0) {
+      const streakBonus = Math.floor(state.streak / 5);
+      state.playerScore += streakBonus;
+      state.timeLeft = Math.min(state.timeLeft + streakBonus * 2, DIFFICULTIES[state.difficulty].timeLimit * 2);
+      log("sys", `🔥 ${state.streak}스트릭! 보너스 점수 +${streakBonus}! 시간 +${streakBonus * 2}초!`);
+      createParticlesAtElement(el.submitBtn, "combo", 25);
+      updateTimerUI();
+    }
     
     if (state.combo === 3) {
       log("sys", "🔥 3콤보 달성! 보너스 점수 +1! 시간 +2초!");
       state.playerScore++;
       state.timeLeft = Math.min(state.timeLeft + 2, DIFFICULTIES[state.difficulty].timeLimit);
+      createParticlesAtElement(el.submitBtn, "combo", 20);
       updateTimerUI();
     } else if (state.combo === 5) {
       log("sys", "⚡ 5콤보 달성! 대단합니다! 보너스 점수 +2! 시간 +3초!");
       state.playerScore += 2;
       state.timeLeft = Math.min(state.timeLeft + 3, DIFFICULTIES[state.difficulty].timeLimit);
+      createParticlesAtElement(el.submitBtn, "combo", 25);
       updateTimerUI();
     } else if (state.combo === 10) {
       log("sys", "🎉 10콤보 달성! 전설적인 플레이! 보너스 점수 +5! 시간 +5초!");
       state.playerScore += 5;
       state.timeLeft = Math.min(state.timeLeft + 5, DIFFICULTIES[state.difficulty].timeLimit);
+      createParticlesAtElement(el.submitBtn, "combo", 30);
       updateTimerUI();
     }
     
@@ -1472,12 +1913,21 @@
       const entry = el.logWindow.lastElementChild;
       if (entry) entry.classList.add("combo");
       el.statusLabel.textContent = "⚡ 환승역 콤보! 대단합니다!";
+      createParticlesAtElement(el.submitBtn, "combo", 20);
     } else if (state.combo >= 5) {
       log("player", `⚡ ${result.station} 🔥 ${state.combo}콤보 달성!`);
       el.statusLabel.textContent = `🔥 ${state.combo}콤보! 계속 이어가세요!`;
+      if (state.combo % 5 === 0) {
+        createParticlesAtElement(el.submitBtn, "combo", 15);
+      }
     } else {
       log("player", `✅ ${result.station}`);
       el.statusLabel.textContent = "좋습니다! 계속 이어가세요!";
+    }
+    
+    // 일반 성공 시에도 작은 파티클 효과
+    if (state.combo < 3 && !isBonus && !isTransfer) {
+      createParticlesAtElement(el.submitBtn, "combo", 5);
     }
     
     el.stationInput.value = "";
@@ -1604,6 +2054,14 @@
     state.lastStation = chosen;
     state.aiScore++;
     
+    // AI가 방문한 역도 지도에 추가 (플레이어와 구분)
+    state.visitedStations.push({
+      name: chosen,
+      isBonus: false,
+      isAI: true
+    });
+    updateMapVisualization();
+    
     const isTransfer = STATION_LINES[norm] && STATION_LINES[norm].size > 1;
     if (isTransfer && cfg.comboTransfers) {
       state.aiScore += 2;
@@ -1695,11 +2153,15 @@
     state.playerScore = 0;
     state.aiScore = 0;
     state.combo = 0;
+    state.streak = 0; // 스트릭 초기화
+    state.visitedStations = []; // 방문한 역 초기화
+    state.bonusActive = false;
     const cfg = DIFFICULTIES[state.difficulty];
     state.lives = cfg.lives;
     state.aiLives = cfg.lives; // AI 생명력 초기화
     state.timeLeft = cfg.timeLimit;
     state.chainLineLock = null;
+    updateMapVisualization(); // 지도 초기화
     
     el.logWindow.innerHTML = "";
     el.stationInput.value = "";
@@ -1775,11 +2237,16 @@
       playerScore: document.getElementById("playerScore"),
       aiScore: document.getElementById("aiScore"),
       comboCount: document.getElementById("comboCount"),
+      streakCount: document.getElementById("streakCount"),
       lives: document.getElementById("lives"),
       aiLives: document.getElementById("aiLives"),
       usedCount: document.getElementById("usedCount"),
       hintText: document.getElementById("hintText"),
       resetGameBtn: document.getElementById("resetGameBtn"),
+      mapStations: document.getElementById("mapStations"),
+      particleContainer: document.getElementById("particleContainer"),
+      bonusOverlay: document.getElementById("bonusOverlay"),
+      bonusText: document.getElementById("bonusText"),
       enemyAvatar: document.getElementById("enemyAvatar"),
       enemyName: document.getElementById("enemyName"),
       enemyRole: document.getElementById("enemyRole"),
